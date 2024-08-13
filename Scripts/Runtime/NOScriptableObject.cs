@@ -1,6 +1,9 @@
 using UnityEngine;
 
-public abstract class NOScriptableObject : ScriptableObject
+namespace NiqonNO
 {
-    
+    public abstract class NOScriptableObject : ScriptableObject
+    {
+
+    }
 }

@@ -1,9 +1,12 @@
 using UnityEngine;
 
-public static partial class NOMath2D
+namespace NiqonNO
 {
-    public static Vector2 Abs(this Vector2 vector)
+    public static partial class NOMath2D
     {
-        return new Vector2(Mathf.Abs(vector.x), Mathf.Abs(vector.y));
+        public static Vector2 Abs(this Vector2 vector)
+        {
+            return new Vector2(Mathf.Abs(vector.x), Mathf.Abs(vector.y));
+        }
     }
 }
