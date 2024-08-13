@@ -1,0 +1,15 @@
+{
+  "name": "com.niqonno.core",
+  "version": "1.0.0",
+  "displayName": "NiqonNO Core",
+  "description": "Core utilities for multiple projects",
+  "unity": "2019.4.39",
+  "dependencies": {
+    "odininspector": "3.3.1.7"
+ },
+  "author": {
+    "name": "NiqonNO",
+    "email": "Niqon.NO@gmail.com",
+    "url": ""
+  }
+}
