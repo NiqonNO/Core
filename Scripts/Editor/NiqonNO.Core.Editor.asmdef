@@ -1,0 +1,16 @@
+{
+    "name": "NiqonNO.Core.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:4925df66c94da9345b78305696ea4beb"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
