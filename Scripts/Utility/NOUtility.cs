@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace NiqonNO.Utility
+namespace NiqonNO.Core.Utility
 {
     public static class NOUtility
     {

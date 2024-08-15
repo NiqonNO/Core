@@ -1,4 +1,3 @@
-using NiqonNO.Core;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
@@ -9,7 +8,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace NiqonNO.Editor
+namespace NiqonNO.Core.Editor
 {
     public class NOcriptableObjectCreator : OdinMenuEditorWindow
     {
@@ -17,6 +16,7 @@ namespace NiqonNO.Editor
             .Where(t =>
                 t.IsClass &&
                 typeof(NOScriptableObject).IsAssignableFrom(t) &&
+                !typeof(NOManagerState).IsAssignableFrom(t) &&
                 !typeof(EditorWindow).IsAssignableFrom(t) &&
                 !typeof(UnityEditor.Editor).IsAssignableFrom(t))
            .ToHashSet();

@@ -1,6 +1,6 @@
 {
-    "name": "NiqonNO.Editor",
-    "rootNamespace": "NiqonNO.Editor",
+    "name": "NiqonNO.Core.Editor",
+    "rootNamespace": "NiqonNO.Core.Editor",
     "references": [
         "GUID:4925df66c94da9345b78305696ea4beb",
         "GUID:140ec908eca78514b9f4c8b1189d3faf"

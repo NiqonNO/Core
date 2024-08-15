@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace NiqonNO
+namespace NiqonNO.Core.Utility
 {
     public static partial class NOMath2D
     {

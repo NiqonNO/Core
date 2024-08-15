@@ -1,35 +1,54 @@
-using NiqonNO.Utility;
-using Sirenix.OdinInspector;
 using Sirenix.Utilities;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace NiqonNO.Core
 {
-    public class NOProjectContext : NOScriptableObject, INOContext
+    public class NOProjectContext : NOScriptableObject
     {
+        private const string ResourcesCorePath = "Core";
+        public static NOProjectContext ProjectContext { get; private set; }
+
         [field: SerializeField]
         public NOManagerScriptableObject[] ScriptableObjectManagers { get; private set; }
 
-        IEnumerable<string> GetScenes() => NOUtility.GetScenesInBuildSettings();
-        [field: SerializeField, ValueDropdown(nameof(GetScenes))]
-        public string MainScene { get; private set; }
-
-        public void SetupContext()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void Initialize()
         {
-            Debug.Log("Project Context Initialize");
+            var projectContexts = Resources.LoadAll<NOProjectContext>(ResourcesCorePath);
+            if (projectContexts.IsNullOrEmpty())
+            {
+                Debug.LogError($"Could not find object of type {nameof(NOProjectContext)} in Resources \"{ResourcesCorePath}\" folder. Project will not be initialized.");
+                return;
+            }
+            if (projectContexts.Length > 1)
+            {
+                Debug.LogWarning($"More than one objects of type {nameof(NOProjectContext)} have been found in Resources \"{ResourcesCorePath}\" folder. First result will be used.");
+            }
+            
+            ProjectContext = projectContexts[0];
+            ProjectContext.SetupProjectContext();
+        }
+
+        private void SetupProjectContext()
+        {
+            Debug.Log("Project Context Setup");
+            
+            Application.quitting += DisposeProjectContext;
             if (!ScriptableObjectManagers.IsNullOrEmpty())
             {
                 ScriptableObjectManagers.ForEach(m => m.Initialize());
             }
         }
-        public void DisposeContext()
+        private void DisposeProjectContext()
         {
             Debug.Log("Project Context Dispose");
+            
+            Application.quitting -= DisposeProjectContext;
             if (!ScriptableObjectManagers.IsNullOrEmpty())
             {
                 ScriptableObjectManagers.ForEach(m => m.Dispose());
             }
+            ProjectContext = null;
         }
     }
 }
