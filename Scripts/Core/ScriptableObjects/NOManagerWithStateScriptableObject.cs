@@ -4,13 +4,18 @@ namespace NiqonNO.Core
 {
     public abstract class NOManagerWithStateScriptableObject<T> : NOManagerScriptableObject where T : NOManagerState
     {
-        protected T RuntimeState { get; private set; }
+        protected static T RuntimeState { get; private set; }
 
         public override void Initialize()
         {
+            if (RuntimeState)
+            {
+                Debug.LogError($"More than one manager of type {GetType().Name} is initialized or previous session have not been cleared correctly.", this);
+                return;
+            }
             RuntimeState = CreateInstance<T>();
         }
-
+        
         public override void Dispose()
         {
             Destroy(RuntimeState);

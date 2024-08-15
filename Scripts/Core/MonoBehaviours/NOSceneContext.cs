@@ -1,12 +1,14 @@
-using NiqonNO.Utility;
+using System;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities;
 using System.Collections.Generic;
+using NiqonNO.Core.Scene;
+using NiqonNO.Core.Utility;
 using UnityEngine;
 
 namespace NiqonNO.Core
 {
-    public class NOSceneContext : MonoBehaviour, INOContext
+    public class NOSceneContext : NOMonoBehaviour
     {
         [field: SerializeField]
         public NOManagerMonoBehaviour[] MonoBehaviourManagers { get; private set; }
@@ -17,25 +19,26 @@ namespace NiqonNO.Core
         [field: SerializeField, ValueDropdown(nameof(GetScenes))]
         public string[] SceneDependencies { get; private set; }
 
-        public void SetupContext()
+        private void Awake()
+        {
+            NOSceneManager.SceneManager.RegisterScene(this);
+        }
+        void Start() => Debug.Log($"Scene {gameObject.scene.name} Start");
+        
+        public void SetupSceneContext()
         {
             Debug.Log($"Scene {gameObject.scene.name} Context Initialize");
-            if (!MonoBehaviourManagers.IsNullOrEmpty())
-            {
-                MonoBehaviourManagers.ForEach(m => m.Initialize());
-            }
             if (!ScriptableObjectManagers.IsNullOrEmpty())
             {
                 ScriptableObjectManagers.ForEach(m => m.Initialize());
             }
+            if (!MonoBehaviourManagers.IsNullOrEmpty())
+            {
+                MonoBehaviourManagers.ForEach(m => m.Initialize());
+            }
         }
 
-        void Awake() => Debug.Log($"Scene {gameObject.scene.name} Awake");
-        void Start() => Debug.Log($"Scene {gameObject.scene.name} Start");
-        void OnDisable() => Debug.Log($"Scene {gameObject.scene.name} Disable");
-        void OnDestroy() => Debug.Log($"Scene {gameObject.scene.name} Destroy");
-
-        public void DisposeContext()
+        public void DisposeSceneContext()
         {
             Debug.Log($"Scene {gameObject.scene.name} Context Dispose");
             if (!MonoBehaviourManagers.IsNullOrEmpty())

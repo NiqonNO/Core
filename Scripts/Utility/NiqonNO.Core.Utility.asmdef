@@ -1,6 +1,6 @@
 {
-    "name": "NiqonNO.Utility",
-    "rootNamespace": "NiqonNO.Utility",
+    "name": "NiqonNO.Core.Utility",
+    "rootNamespace": "NiqonNO.Core.Utility",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
