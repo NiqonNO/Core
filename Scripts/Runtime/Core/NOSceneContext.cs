@@ -1,9 +1,5 @@
 using System;
-using Sirenix.OdinInspector;
 using Sirenix.Utilities;
-using System.Collections.Generic;
-using NiqonNO.Core.Scene;
-using NiqonNO.Core.Utility;
 using UnityEngine;
 
 namespace NiqonNO.Core
@@ -15,14 +11,7 @@ namespace NiqonNO.Core
         [field: SerializeField]
         public NOManagerScriptableObject[] ScriptableObjectManagers { get; private set; }
 
-        IEnumerable<string> GetScenes() => NOUtility.GetScenesInBuildSettings();
-        [field: SerializeField, ValueDropdown(nameof(GetScenes))]
-        public string[] SceneDependencies { get; private set; }
-
-        private void Awake()
-        {
-            NOSceneManager.SceneManager.RegisterScene(this);
-        }
+        void Awake() => Debug.Log($"Scene {gameObject.scene.name} Awake");
         void Start() => Debug.Log($"Scene {gameObject.scene.name} Start");
         
         public void SetupSceneContext()
