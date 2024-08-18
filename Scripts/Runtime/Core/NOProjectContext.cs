@@ -14,6 +14,7 @@ namespace NiqonNO.Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Initialize()
         {
+            Debug.Log("Initialize");
             var projectContexts = Resources.LoadAll<NOProjectContext>(ResourcesCorePath);
             if (projectContexts.IsNullOrEmpty())
             {
