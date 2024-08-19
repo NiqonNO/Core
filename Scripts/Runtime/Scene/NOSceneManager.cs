@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Sirenix.OdinInspector;
-using Sirenix.Utilities;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 namespace NiqonNO.Core.Scene
@@ -18,56 +18,82 @@ namespace NiqonNO.Core.Scene
         [SerializeField, HideLabel]
         private NOSceneDependencyData SceneDependencyTree;
 
+        [Space]
+        [SerializeField] 
+        private UnityEvent OnLoadingStartedEvent;
+        [SerializeField] 
+        private UnityEvent OnLoadingFinishedEvent;
+
         private Dictionary<string, NOSceneContext>  LoadedScenes => RuntimeState.LoadedScenes;
-        private SortedSet<string> SortedScenesToLoad
+        private bool IsLoading => LoadSceneCommand != null;
+        
+        private NOSceneLoadCommand LoadSceneCommand
         {
-            get => RuntimeState.SortedScenesToLoad;
-            set => RuntimeState.SortedScenesToLoad = value;
-        }
-        private SortedSet<string> SortedScenesToUnload
-        {
-            get => RuntimeState.SortedScenesToUnload;
-            set => RuntimeState.SortedScenesToUnload = value;
+            get => RuntimeState.LoadSceneCommand;
+            set => RuntimeState.LoadSceneCommand = value;
         }
         
         public override void Initialize()
         {
             base.Initialize();
             SceneManagerInstance = this;
-            SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.sceneLoaded += CheckGameReady;
+        }
+
+        private void CheckGameReady(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadMode)
+        {
+            SetupSceneContext(scene);
+            if (SceneManager.sceneCount != LoadedScenes.Count) return;
+            SceneManager.sceneLoaded -= CheckGameReady;
         }
 
         [Button]
+        public void SwitchScene(string sceneToLoad, string sceneToUnload)
+        {
+            if (IsLoading)
+            {
+                LoadSceneCommand.AddSceneToLoad(sceneToLoad);
+                LoadSceneCommand.AddSceneToUnload(sceneToUnload);
+                return;
+            }
+            CreateSceneLoadCommand(sceneToLoad, sceneToUnload);
+        }
+        [Button]
         public void LoadScene(string scene)
         {
-            SortedScenesToLoad = NOSceneDependencyData.GetSceneDependencies(scene, SortedScenesToLoad);
+            if (IsLoading)
+            {
+                LoadSceneCommand.AddSceneToLoad(scene);
+                return;
+            }
+            CreateSceneLoadCommand(scene, "");
         }
-        
         [Button]
         public void UnloadScene(string scene)
         {
-            SortedScenesToUnload = NOSceneDependencyData.GetSceneDependencies(scene, SortedScenesToUnload);
+            if (IsLoading)
+            {
+                LoadSceneCommand.AddSceneToUnload(scene);
+                return;
+            }
+            CreateSceneLoadCommand("", scene);
         }
-        
-        /*private async Awaitable LoadSceneCommand()
+
+        private void CreateSceneLoadCommand(string sceneToLoad, string sceneToUnload)
         {
-            await Awaitable.FromAsyncOperation(SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive));
-            // do some heavy math here
-            return; // this will make the returned awaitable complete on a background thread
-        }*/
-        
-        private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadMode)
-        {
-            SetupSceneContext(scene);
-            SortedScenesToLoad.Remove(scene.name);
-            
+            OnLoadingStartedEvent.Invoke();
+            LoadSceneCommand = new NOSceneLoadCommand(sceneToLoad, sceneToUnload, FinishSceneLoadCommand);
+            LoadSceneCommand.OnSceneLoaded += SetupSceneContext;
+            LoadSceneCommand.OnBeforeSceneUnloaded += DisposeSceneContext;
+            LoadSceneCommand.Run();
         }
-        
-        public override void Dispose()
+        private void FinishSceneLoadCommand()
         {
-            LoadedScenes.Reverse().ForEach(context => context.Value.DisposeSceneContext());
-            SceneManager.sceneLoaded += OnSceneLoaded;
-            base.Dispose();
+            OnLoadingFinishedEvent.Invoke();
+            LoadSceneCommand.Complete();
+            LoadSceneCommand.OnSceneLoaded -= SetupSceneContext;
+            LoadSceneCommand.OnBeforeSceneUnloaded -= DisposeSceneContext;
+            LoadSceneCommand = null;
         }
         
         private void SetupSceneContext(UnityEngine.SceneManagement.Scene scene)
@@ -94,13 +120,36 @@ namespace NiqonNO.Core.Scene
         
         private void DisposeSceneContext(UnityEngine.SceneManagement.Scene scene)
         {
-            if (!LoadedScenes.TryGetValue(scene.name, out var context) || context == null)
+            if (!LoadedScenes.TryGetValue(scene.name, out var context))
             {
                 Debug.LogWarning($"Could not find {nameof(NOSceneContext)} for \"{scene.name}\" scene to dispose.");
                 return;
             }
-            LoadedScenes[scene.name].DisposeSceneContext();
+            if (context == null)
+            {
+                Debug.LogWarning($"{nameof(NOSceneContext)} for \"{scene.name}\" scene is missing.");
+                LoadedScenes.Remove(scene.name);
+                return;
+            }
+            
+            context.DisposeSceneContext();
             LoadedScenes.Remove(scene.name);
+        }
+        
+        public override void Dispose()
+        {
+            if (IsLoading)
+            {
+                LoadSceneCommand.Cancel();
+            }
+
+            foreach (var scene in LoadedScenes.Reverse())
+            {
+                if (!scene.Value) continue;
+                scene.Value.DisposeSceneContext();
+            }
+
+            base.Dispose();
         }
     }
 }
