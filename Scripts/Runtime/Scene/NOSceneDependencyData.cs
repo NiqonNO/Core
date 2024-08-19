@@ -20,14 +20,14 @@ namespace NiqonNO.Core.Scene
         }
         public static SortedSet<string> GetSceneDependencies(string scene,  SortedSet<string> sceneCollection)
         {
-            if (sceneCollection.Contains(scene)) return sceneCollection;
+            if (sceneCollection.Contains(scene) || !PersistentSceneDependency.ContainsKey(scene)) return sceneCollection;
             sceneCollection.Add(scene);
             return PersistentSceneDependency[scene].Aggregate(sceneCollection, (current, sceneDependency) => GetSceneDependencies(sceneDependency, current));
         }
         
         public static void ValidateData()
         {
-            var newDictionary =  Utility.Editor.NOEditorUtility.GetScenesInBuildSettings().ToDictionary(
+            var newDictionary =  Utility.NOUtility.GetScenesInBuildSettings().ToDictionary(
                 scene => scene, 
                 scene => PersistentSceneDependency.TryGetValue(scene, value: out var value) 
                     ? value : new string[0]);
@@ -71,8 +71,7 @@ namespace NiqonNO.Core.Scene
                 SceneName = key;
                 SceneDependencies = values;
             }
-            
-            private IEnumerable<string> GetScenes => Utility.Editor.NOEditorUtility.GetScenesInBuildSettings();
+            private IEnumerable<string> GetScenes => Utility.NOUtility.GetScenesInBuildSettings();
         }
         
         internal class SceneDepthComparer : IComparer<string>
@@ -88,27 +87,27 @@ namespace NiqonNO.Core.Scene
             {
                 if (x == y)
                     return 0;
-                if (DependsOn(x, y))
+                if (SceneDependsOn(x, y))
                     return 1 * Direction;
-                if (DependsOn(y, x))
+                if (SceneDependsOn(y, x))
                     return -1 * Direction;
                 return string.Compare(x, y, StringComparison.Ordinal) * Direction;
             }
-        
-            private bool DependsOn(string item, string dependency)
+        }
+
+        public static bool SceneDependsOn(string item, string dependency)
+        {
+            if (PersistentSceneDependency.TryGetValue(item, out var deps))
             {
-                if (PersistentSceneDependency.TryGetValue(item, out var deps))
+                foreach (var dep in deps)
                 {
-                    foreach (var dep in deps)
+                    if (dep == dependency || SceneDependsOn(dep, dependency))
                     {
-                        if (dep == dependency || DependsOn(dep, dependency))
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
-                return false;
             }
+            return false;
         }
     }
 }

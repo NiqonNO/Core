@@ -14,7 +14,6 @@ namespace NiqonNO.Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Initialize()
         {
-            Debug.Log("Initialize");
             var projectContexts = Resources.LoadAll<NOProjectContext>(ResourcesCorePath);
             if (projectContexts.IsNullOrEmpty())
             {
@@ -32,8 +31,6 @@ namespace NiqonNO.Core
 
         private void SetupProjectContext()
         {
-            Debug.Log("Project Context Setup");
-            
             Application.quitting += DisposeProjectContext;
             if (!ScriptableObjectManagers.IsNullOrEmpty())
             {
@@ -42,8 +39,6 @@ namespace NiqonNO.Core
         }
         private void DisposeProjectContext()
         {
-            Debug.Log("Project Context Dispose");
-            
             Application.quitting -= DisposeProjectContext;
             if (!ScriptableObjectManagers.IsNullOrEmpty())
             {
