@@ -1,6 +1,6 @@
 {
   "name": "com.niqonno.core",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "displayName": "NiqonNO Core",
   "description": "Core utilities for multiple projects",
   "unity": "2019.4",

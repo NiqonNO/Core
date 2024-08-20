@@ -57,20 +57,25 @@ namespace NiqonNO.Core.Editor
 
         protected override OdinMenuTree BuildMenuTree()
         {
-            this.MenuWidth = 270;
-            this.WindowPadding = Vector4.zero;
+            MenuWidth = 270;
+            WindowPadding = Vector4.zero;
 
-            OdinMenuTree tree = new OdinMenuTree(false);
-            tree.Config.DrawSearchToolbar = true;
-            tree.DefaultMenuStyle = OdinMenuStyle.TreeViewStyle;
+            OdinMenuTree tree = new OdinMenuTree(false)
+            {
+                Config =
+                {
+                    DrawSearchToolbar = true
+                },
+                DefaultMenuStyle = OdinMenuStyle.TreeViewStyle
+            };
             tree.AddRange(scriptableObjectTypes.Where(x => !x.IsAbstract), GetMenuPathForType).AddThumbnailIcons();
             tree.SortMenuItemsByName();
-            tree.Selection.SelectionConfirmed += x => this.CreateAsset();
+            tree.Selection.SelectionConfirmed += x => CreateAsset();
             tree.Selection.SelectionChanged += e =>
             {
-                if (this.previewObject && !AssetDatabase.Contains(this.previewObject))
+                if (previewObject && !AssetDatabase.Contains(previewObject))
                 {
-                    DestroyImmediate(this.previewObject);
+                    DestroyImmediate(previewObject);
                 }
 
                 if (e != SelectionChangedType.ItemAdded)
@@ -78,10 +83,10 @@ namespace NiqonNO.Core.Editor
                     return;
                 }
 
-                var t = this.SelectedType;
-                if (t != null && !t.IsAbstract)
+                var t = SelectedType;
+                if (t is { IsAbstract: false })
                 {
-                    this.previewObject = CreateInstance(t) as ScriptableObject;
+                    previewObject = CreateInstance(t);
                 }
             };
 
@@ -90,10 +95,10 @@ namespace NiqonNO.Core.Editor
 
         private string GetMenuPathForType(Type t)
         {
-            if (t != null && scriptableObjectTypes.Contains(t))
+            if (t != null && t != typeof(NOScriptableObject))
             {
-                var name = t.Name.Split('`').First().SplitPascalCase();
-                return GetMenuPathForType(t.BaseType) + "/" + name;
+                var menuNamePath = t.Name.Split('`').First().SplitPascalCase();
+                return GetMenuPathForType(t.BaseType) + "/" + menuNamePath;
             }
 
             return "";
