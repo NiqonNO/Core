@@ -4,5 +4,10 @@ using UnityEngine;
 namespace NiqonNO.Core
 {
     [Serializable] public class NOColorValueAsset : NOValueAsset<Color> {}
-    [Serializable] public class NOColorValue : NOValue<Color, NOValueAsset<Color>> {}
+    [Serializable] public class NOColorValue : NOValue<Color, NOValueAsset<Color>>
+    {
+        public NOColorValue(Color value) : base(value)
+        {
+        }
+    }
 }

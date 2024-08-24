@@ -13,5 +13,9 @@ namespace NiqonNO.Core
                 else LocalValue = value;
             }
         }
+
+        protected NOVariable(T1 value) : base(value)
+        {
+        }
     }
 }

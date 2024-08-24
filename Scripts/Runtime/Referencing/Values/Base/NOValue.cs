@@ -13,5 +13,10 @@ namespace NiqonNO.Core
         [SerializeField] 
         protected T2 LocalReference;
         public T1 Value => UseReference ? LocalReference.Value : LocalValue;
+
+        public NOValue(T1 value)
+        {
+            LocalValue = value;
+        }
     }
 }

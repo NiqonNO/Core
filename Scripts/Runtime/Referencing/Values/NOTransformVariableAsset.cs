@@ -4,5 +4,10 @@ using UnityEngine;
 namespace NiqonNO.Core
 {
     [Serializable] public class NOTransformVariableAsset : NOVariableAsset<Transform> {}
-    [Serializable] public class NOTransformVariable : NOVariable<Transform, NOVariableAsset<Transform>> {}
+    [Serializable] public class NOTransformVariable : NOVariable<Transform, NOVariableAsset<Transform>>
+    {
+        public NOTransformVariable(Transform value) : base(value)
+        {
+        }
+    }
 }
