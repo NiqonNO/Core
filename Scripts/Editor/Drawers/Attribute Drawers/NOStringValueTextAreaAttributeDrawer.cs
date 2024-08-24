@@ -1,15 +1,16 @@
-﻿using Sirenix.OdinInspector.Editor;
+﻿using NiqonNO.Core.Utility.Attributes;
+using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities.Editor;
 using UnityEngine;
 
-namespace NiqonNO.Core.Editor.Drawers.PropertyDrawers
+namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers
 {
-    public class NOValueDrawer<T1, T2, T3> : OdinValueDrawer<T1> where T1 : NOValue<T2, T3> where T3 : NOValueAsset<T2>
+    public class NOStringValueTextAreaAttributeDrawer<T1, T2> : OdinAttributeDrawer<NOStringValueTextAreaAttribute, T1> where T1 : NOValue<string, T2> where T2 : NOValueAsset<string>
     {
         InspectorProperty UseReferenceProperty;
         InspectorProperty LocalValueProperty;
         InspectorProperty LocalReferenceProperty;
-
+        
         protected override void Initialize()
         {
             UseReferenceProperty = Property.Children["UseReference"];
@@ -18,15 +19,17 @@ namespace NiqonNO.Core.Editor.Drawers.PropertyDrawers
         }
         protected override void DrawPropertyLayout(GUIContent label)
         {
-            SirenixEditorGUI.BeginHorizontalPropertyLayout(label ?? GUIContent.none);
+            SirenixEditorGUI.BeginHorizontalPropertyLayout((bool)UseReferenceProperty.ValueEntry.WeakSmartValue && label != null ? label : GUIContent.none);
             
             bool popupResult = NOEditorDrawerUtility.DrawReferenceDropDown((bool)UseReferenceProperty.ValueEntry.WeakSmartValue);
             UseReferenceProperty.ValueEntry.WeakSmartValue = popupResult;
 
             if (popupResult) LocalReferenceProperty.Draw(GUIContent.none);
-            else LocalValueProperty.Draw(GUIContent.none);
-            
+            else LocalValueProperty.ValueEntry.WeakSmartValue = NOEditorDrawerUtility.DrawTextArea(label, (IPropertyValueEntry<string>)LocalValueProperty.ValueEntry, ref scrollPosition, Attribute.minLines, Attribute.maxLines);
+
             SirenixEditorGUI.EndHorizontalPropertyLayout();
         }
+        
+        private Vector2 scrollPosition;
     }
 }
