@@ -6,8 +6,7 @@ namespace NiqonNO.Core
     [Serializable] public class NOGameObjectValueAsset : NOValueAsset<GameObject> {}
     [Serializable] public class NOGameObjectValue : NOValue<GameObject, NOValueAsset<GameObject>>
     {
-        public NOGameObjectValue(GameObject value) : base(value)
-        {
-        }
+        //public NOGameObjectValue() : base(default) { }
+        public NOGameObjectValue(GameObject value) : base(value) { }
     }
 }

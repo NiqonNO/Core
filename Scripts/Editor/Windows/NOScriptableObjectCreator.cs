@@ -93,16 +93,7 @@ namespace NiqonNO.Core.Editor
             return tree;
         }
 
-        private string GetMenuPathForType(Type t)
-        {
-            if (t != null && t != typeof(NOScriptableObject))
-            {
-                var menuNamePath = t.Name.Split('`').First().SplitPascalCase();
-                return GetMenuPathForType(t.BaseType) + "/" + menuNamePath;
-            }
-
-            return "";
-        }
+        private string GetMenuPathForType(Type t) => t.GetDerivedPath(typeof(NOScriptableObject));
 
         protected override IEnumerable<object> GetTargets()
         {
