@@ -15,14 +15,11 @@ namespace NiqonNO.Core
             }
         }
 
-        protected NOVariableBase(T1 value) : base(value)
-        {
-        }
+        protected NOVariableBase(T1 value) : base(value) { }
     }
     
     [Serializable] public abstract class NOVariable<T> : NOVariableBase<T, NOVariableAsset<T>>
     {
-        public NOVariable() : base(default) { }
-        public NOVariable(T value) : base(value) { }
+        protected NOVariable(T value) : base(value) { }
     }
 }
