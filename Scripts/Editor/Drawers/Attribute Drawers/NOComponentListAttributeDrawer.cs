@@ -25,6 +25,7 @@ namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers
             !t.IsAbstract &&
             !t.IsGenericType &&
             typeof(T2).IsAssignableFrom(t) &&
+            !typeof(UnityEngine.Object).IsAssignableFrom(t) &&
             (Attribute.IncludeBaseClass || t != typeof(T2)));
     }
 
@@ -69,6 +70,7 @@ namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers
       selector.SelectionTree.EnumerateTree().ForEach(x =>
       {
         var valueType = (Type)x.Value;
+        if (valueType == null) return;
         var setting = TypeRegistryUserConfig.Instance.TryGetSettings(valueType);
         if (setting != null && setting.Icon != SdfIconType.None)
           x.AddIcon(setting.Icon);

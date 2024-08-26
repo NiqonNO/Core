@@ -13,7 +13,7 @@ namespace NiqonNO.Core.Editor
         public static string GetDerivedPath(this Type type, Type baseType, bool includeBase = false)
         {
             if (type == null) return "";
-            if (type == baseType) return includeBase ? type.Name.Split('`').First().SplitPascalCase() : "";
+            if (!baseType.IsAssignableFrom(type)) return includeBase ? type.Name.Split('`').First().SplitPascalCase() : "";
             var menuNamePath = type.Name.Split('`').First().SplitPascalCase();
             return type.BaseType.GetDerivedPath(baseType, includeBase) + "/" + menuNamePath;
         }
