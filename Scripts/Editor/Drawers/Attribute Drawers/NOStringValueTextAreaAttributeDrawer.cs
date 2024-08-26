@@ -11,6 +11,8 @@ namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers
         InspectorProperty LocalValueProperty;
         InspectorProperty LocalReferenceProperty;
         
+        private Vector2 ScrollPosition;
+        
         protected override void Initialize()
         {
             UseReferenceProperty = Property.Children["UseReference"];
@@ -25,11 +27,9 @@ namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers
             UseReferenceProperty.ValueEntry.WeakSmartValue = popupResult;
 
             if (popupResult) LocalReferenceProperty.Draw(GUIContent.none);
-            else LocalValueProperty.ValueEntry.WeakSmartValue = NOEditorDrawerUtility.DrawTextArea(label, (IPropertyValueEntry<string>)LocalValueProperty.ValueEntry, ref scrollPosition, Attribute.minLines, Attribute.maxLines);
+            else LocalValueProperty.ValueEntry.WeakSmartValue = NOEditorDrawerUtility.DrawTextArea(label, (IPropertyValueEntry<string>)LocalValueProperty.ValueEntry, ref ScrollPosition, Attribute.minLines, Attribute.maxLines);
 
             SirenixEditorGUI.EndHorizontalPropertyLayout();
         }
-        
-        private Vector2 scrollPosition;
     }
 }
