@@ -1,8 +1,9 @@
+using System;
 using UnityEngine;
 
 namespace NiqonNO.Core
 {
-    public abstract class NOVariable<T1, T2> : NOValue<T1, T2> where T2 : NOVariableAsset<T1> 
+    [Serializable] public abstract class NOVariableBase<T1, T2> : NOValueBase<T1, T2> where T2 : NOVariableAsset<T1> 
     {
         public new T1 Value
         {
@@ -14,8 +15,14 @@ namespace NiqonNO.Core
             }
         }
 
-        protected NOVariable(T1 value) : base(value)
+        protected NOVariableBase(T1 value) : base(value)
         {
         }
+    }
+    
+    [Serializable] public abstract class NOVariable<T> : NOVariableBase<T, NOVariableAsset<T>>
+    {
+        public NOVariable() : base(default) { }
+        public NOVariable(T value) : base(value) { }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers
 {
-    public class NOStringValueTextAreaAttributeDrawer<T1, T2> : OdinAttributeDrawer<NOStringValueTextAreaAttribute, T1> where T1 : NOValue<string, T2> where T2 : NOValueAsset<string>
+    public class NOStringValueTextAreaAttributeDrawer<T1, T2> : OdinAttributeDrawer<NOStringValueTextAreaAttribute, T1> where T1 : NOValueBase<string, T2> where T2 : NOValueAsset<string>
     {
         InspectorProperty UseReferenceProperty;
         InspectorProperty LocalValueProperty;

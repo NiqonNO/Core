@@ -3,8 +3,7 @@ using UnityEngine;
 
 namespace NiqonNO.Core
 {
-    [Serializable]
-    public abstract class NOValue<T1, T2>  where T2 : NOValueAsset<T1>
+    [Serializable] public abstract class NOValueBase<T1, T2>  where T2 : NOValueAsset<T1>
     {
         [SerializeField] 
         protected bool UseReference;
@@ -14,9 +13,15 @@ namespace NiqonNO.Core
         protected T2 LocalReference;
         public T1 Value => UseReference ? LocalReference.Value : LocalValue;
 
-        public NOValue(T1 value)
+        public NOValueBase(T1 value)
         {
             LocalValue = value;
         }
+    }
+    
+    [Serializable] public abstract class NOValue<T> : NOValueBase<T, NOValueAsset<T>>
+    {
+        public NOValue() : base(default) { }
+        public NOValue(T value) : base(value) { }
     }
 }
