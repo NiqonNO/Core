@@ -13,7 +13,7 @@ namespace NiqonNO.Core
         protected T2 LocalReference;
         public T1 Value => UseReference ? LocalReference.Value : LocalValue;
 
-        public NOValueBase(T1 value)
+        protected NOValueBase(T1 value)
         {
             LocalValue = value;
         }
@@ -21,7 +21,6 @@ namespace NiqonNO.Core
     
     [Serializable] public abstract class NOValue<T> : NOValueBase<T, NOValueAsset<T>>
     {
-        public NOValue() : base(default) { }
-        public NOValue(T value) : base(value) { }
+        protected NOValue(T value) : base(value) { }
     }
 }

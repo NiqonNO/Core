@@ -9,7 +9,7 @@ namespace NiqonNO.Core
         public NOManagerMonoBehaviour[] MonoBehaviourManagers { get; private set; }
         [field: SerializeField]
         public NOManagerScriptableObject[] ScriptableObjectManagers { get; private set; }
-        
+
         public void SetupSceneContext()
         {
             if (!ScriptableObjectManagers.IsNullOrEmpty())
