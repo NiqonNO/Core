@@ -64,22 +64,18 @@ namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers
       var valueDropdownItems = ValidClassList ?? Enumerable.Empty<Type>();
 
       GenericSelector<Type> selector = new GenericSelector<Type>(null, false,
-        valueDropdownItems.Select(x => new GenericSelectorItem<Type>(x.GetDerivedPath(typeof(T2), Attribute.IncludeBaseClass), x)));
+        valueDropdownItems.Select(x => new GenericSelectorItem<Type>(x.GetDerivedNicePath(typeof(T2), Attribute.IncludeBaseClass), x)));
       
       selector.EnableSingleClickToSelect();
       selector.SelectionTree.EnumerateTree().ForEach(x =>
       {
         var valueType = (Type)x.Value;
-        if (valueType == null) return;
-        var setting = TypeRegistryUserConfig.Instance.TryGetSettings(valueType);
-        if (setting != null && setting.Icon != SdfIconType.None)
-          x.AddIcon(setting.Icon);
-        else
-          x.AddIcon(SdfIconType.PuzzleFill);
-
+        
         x.IsEnabled = !Property.ValueEntry.WeakValues.Cast<IEnumerable>()
           .SelectMany(e => e.Cast<T2>())
           .Any(c => valueType.IsInstanceOfType(c) || c.GetType().IsAssignableFrom(valueType));
+        
+        x.AddIcon(valueType.GetNiceIcon());
         x.SdfIconColor = x.IsEnabled ? Color.white : Color.grey;
       });
       selector.SelectionTree.Config.DrawSearchToolbar = true;
