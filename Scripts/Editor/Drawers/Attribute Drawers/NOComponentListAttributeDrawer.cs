@@ -71,8 +71,8 @@ namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers
       {
         var valueType = (Type)x.Value;
 
-        x.IsSelectable = valueType == null;
-        x.IsEnabled =  valueType != null && !Property.ValueEntry.WeakValues.Cast<IEnumerable>()
+        x.IsSelectable = valueType != null;
+        x.IsEnabled =  valueType == null || !Property.ValueEntry.WeakValues.Cast<IEnumerable>()
           .SelectMany(e => e.Cast<T2>())
           .Any(c => valueType.IsInstanceOfType(c) || c.GetType().IsAssignableFrom(valueType));
         
