@@ -70,8 +70,9 @@ namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers
       selector.SelectionTree.EnumerateTree().ForEach(x =>
       {
         var valueType = (Type)x.Value;
-        
-        x.IsEnabled = !Property.ValueEntry.WeakValues.Cast<IEnumerable>()
+
+        x.IsSelectable = valueType != null;
+        x.IsEnabled =  valueType != null && !Property.ValueEntry.WeakValues.Cast<IEnumerable>()
           .SelectMany(e => e.Cast<T2>())
           .Any(c => valueType.IsInstanceOfType(c) || c.GetType().IsAssignableFrom(valueType));
         
