@@ -45,6 +45,7 @@ namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers
       foreach(var selected in selectedItems)
       {
         ValueEntry.SmartValue.Add((T2)Activator.CreateInstance(selected));
+        ValueEntry.Property.MarkSerializationRootDirty();
       }
     }
 
