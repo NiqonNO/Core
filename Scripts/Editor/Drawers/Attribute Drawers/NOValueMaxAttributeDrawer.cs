@@ -25,6 +25,10 @@ namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers
         
         protected override void DrawPropertyLayout(GUIContent label)
         {
+            if((bool)UseReferenceProperty.ValueEntry.WeakSmartValue
+               && LocalReferenceProperty.ValueEntry.WeakSmartValue == null)
+                SirenixEditorGUI.ErrorMessageBox("LocalReference should not be null when UseReference is set to true. Value will return default.");
+            
             SirenixEditorGUI.BeginHorizontalPropertyLayout(label ?? GUIContent.none);
             
             bool popupResult = NOEditorDrawerUtility.DrawReferenceDropDown((bool)UseReferenceProperty.ValueEntry.WeakSmartValue);

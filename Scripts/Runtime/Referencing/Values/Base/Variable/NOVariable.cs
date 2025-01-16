@@ -7,11 +7,11 @@ namespace NiqonNO.Core
     {
         public T Value
         {
-            get => UseReference ? LocalReference.Value : LocalValue;
+            get => UseReference ? LocalReference.Value?? default : LocalValue;
             set
             {
-                if(UseReference) LocalReference.Value = value;
-                else LocalValue = value;
+                if(!UseReference) LocalValue = value;
+                else if(LocalReference) LocalReference.Value = value;
             }
         }
         protected NOVariable(T value) : base(value) { }
