@@ -7,7 +7,7 @@ namespace NiqonNO.Core
     {
         public T Value
         {
-            get => UseReference ? LocalReference.Value?? default : LocalValue;
+            get => UseReference ? LocalReference != null ? LocalReference.Value : default : LocalValue;
             set
             {
                 if(!UseReference) LocalValue = value;
