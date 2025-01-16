@@ -61,6 +61,13 @@ namespace NiqonNO.Core.Utility
                 return length;
             }
         }
+        
+        public static Vector2 ClosestPointOnLine(Vector2 position, Vector2 firstCoordinate, Vector2 secondCoordinate)
+        {
+            Vector2 pa = position - firstCoordinate, ba = secondCoordinate - firstCoordinate;
+            float h = Mathf.Clamp01(Vector2.Dot(pa, ba) / Vector2.Dot(ba, ba));
+            return firstCoordinate + h * ba;
+        }
 
         public static float DistanceToBox(Vector2 position, Rect coordinates)
         {
