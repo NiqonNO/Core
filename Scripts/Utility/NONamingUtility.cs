@@ -1,11 +1,12 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace NiqonNO.Core.Utility
 {
     public class NONamingUtility
     {
-        public static string EnsureUniqueName(Object[] collection, string compareName)
+        public static string EnsureUniqueName(IEnumerable<Object> collection, string compareName)
         {
             return EnsureUniqueNameRecursive();
             string EnsureUniqueNameRecursive(int recursiveCount = 0)
@@ -15,7 +16,7 @@ namespace NiqonNO.Core.Utility
                     EnsureUniqueNameRecursive(++recursiveCount) : checkName;
             }
         }
-        public static string EnsureUniqueName(Object[] collection, Object compareItem)
+        public static string EnsureUniqueName(IEnumerable<Object> collection, Object compareItem)
         {
             return EnsureUniqueNameRecursive();
             string EnsureUniqueNameRecursive(int recursiveCount = 0)
