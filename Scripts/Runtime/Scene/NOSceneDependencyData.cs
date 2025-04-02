@@ -24,15 +24,16 @@ namespace NiqonNO.Core.Scene
             sceneCollection.Add(scene);
             return PersistentSceneDependency[scene].Aggregate(sceneCollection, (current, sceneDependency) => GetSceneDependencies(sceneDependency, current));
         }
-        
+#if UNITY_EDITOR
         public static void ValidateData()
         {
-            var newDictionary =  Utility.NOUtility.GetScenesInBuildSettings().ToDictionary(
+            var newDictionary =  Utility.Editor.NOSceneUtility.GetScenesInBuildSettings().ToDictionary(
                 scene => scene, 
                 scene => PersistentSceneDependency.TryGetValue(scene, value: out var value) 
                     ? value : new string[0]);
             PersistentSceneDependency = newDictionary;
         }
+#endif
         void ValidateChange()
         {
             PersistentSceneDependency.Clear();
@@ -71,7 +72,9 @@ namespace NiqonNO.Core.Scene
                 SceneName = key;
                 SceneDependencies = values;
             }
-            private IEnumerable<string> GetScenes => Utility.NOUtility.GetScenesInBuildSettings();
+#if UNITY_EDITOR
+            private IEnumerable<string> GetScenes => Utility.Editor.NOSceneUtility.GetScenesInBuildSettings();
+#endif
         }
         
         internal class SceneDepthComparer : IComparer<string>
