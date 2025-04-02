@@ -6,13 +6,13 @@ namespace NiqonNO.Core.Utility
 {
     public class NONamingUtility
     {
-        public static string EnsureUniqueName(IEnumerable<Object> collection, string compareName)
+        public static string EnsureUniqueName(IEnumerable<string> collection, string compareName)
         {
             return EnsureUniqueNameRecursive();
             string EnsureUniqueNameRecursive(int recursiveCount = 0)
             {
                 string checkName = recursiveCount == 0 ? compareName : $"{compareName}_{recursiveCount}";
-                return collection.Any(child => child.name.Equals(checkName)) ?
+                return collection.Any(child => child.Equals(checkName)) ?
                     EnsureUniqueNameRecursive(++recursiveCount) : checkName;
             }
         }
