@@ -30,21 +30,14 @@ namespace NiqonNO.Core.Utility.Editor
             }
             else
             {
-                item.name = EnsureUniqueName();
+                item.name = NONamingUtility.EnsureUniqueName(assets, item);
             }
-            
+
             UnityEditor.AssetDatabase.AddObjectToAsset(item, parentAsset);
-            
+
             UnityEditor.AssetDatabase.StopAssetEditing();
             UnityEditor.AssetDatabase.SaveAssets();
             UnityEditor.AssetDatabase.Refresh();
-            
-            string EnsureUniqueName(int recursiveCount = 0)
-            {
-                string checkName = recursiveCount == 0 ? item.name : $"{item.name}_{recursiveCount}";
-                return assets.Any(child => child.GetType() == item.GetType() && child.name.Equals(checkName)) ?
-                    EnsureUniqueName(++recursiveCount) : checkName;
-            }
         }
     }
 }
