@@ -137,8 +137,15 @@ namespace NiqonNO.Core.UI
         }
         Vector2 HandleSpring(SpringSetting spring, Vector2 currentPosition, Vector2 originPosition, Vector2 targetPosition)
         {
+            Vector2 assist = Vector2.zero;
             if (IsDragging && IsInteractable())
             {
+                
+                if (spring.UseAssist)
+                {
+                    assist[(int)SlideAxis] = ((TargetPosition - currentPosition) * spring.AssistStrength)[(int)SlideAxis];
+
+                }
                 targetPosition = NormalizePosition(targetPosition);
                 
                 Vector2 fullDisplacement = TargetPosition - currentPosition;
@@ -167,7 +174,7 @@ namespace NiqonNO.Core.UI
             Vector2 acceleration = springForce + dampingForce;
 
             spring.Velocity += acceleration * Time.deltaTime;
-            currentPosition += spring.Velocity * Time.deltaTime;
+            currentPosition += (spring.Velocity + assist) * Time.deltaTime;
 
             if (spring.Velocity.magnitude < spring.RestThreshold)
             {
@@ -198,6 +205,14 @@ namespace NiqonNO.Core.UI
             [field: SerializeField, 
                     MinValue(0)] 
             public float SpringStrength { get; private set; } = 500f;
+            
+            [field: SerializeField]
+            public bool UseAssist { get; private set; } = false;
+            
+            [field: SerializeField, 
+                    ShowIf(nameof(UseAssist)), 
+                    MinValue(1)] 
+            public float AssistStrength { get; private set; } = 10f;
             
             [field: SerializeField, 
                     BoxGroup("Damping"), 
