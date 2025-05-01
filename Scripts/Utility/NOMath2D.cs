@@ -191,13 +191,13 @@ namespace NiqonNO.Core.Utility
             {
                 if (fracY >= fracX && fracY >= fracZ)
                 {
-                    floored.x += 1;
-                    fracX = -1f;
+                    floored.y += 1;
+                    fracY = -1f;
                 }
                 else if (fracX >= fracY && fracX >= fracZ)
                 {
-                    floored.y += 1;
-                    fracY = -1f;
+                    floored.x += 1;
+                    fracX = -1f;
                 }
                 else
                 {
