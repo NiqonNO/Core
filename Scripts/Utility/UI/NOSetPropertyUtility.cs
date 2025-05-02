@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace NiqonNO.Core.UI
+namespace NiqonNO.Core.UI.Utility
 {
-    internal static class NOSetPropertyUtility
+    public static class NOSetPropertyUtility
     {
         public static void SetColor(ref Color currentValue, Color newValue, Action onChangeCallback)
         {

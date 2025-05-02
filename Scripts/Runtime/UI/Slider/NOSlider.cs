@@ -1,3 +1,4 @@
+using NiqonNO.Core.UI.Utility;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -395,29 +396,20 @@ namespace NiqonNO.Core.UI
 
             switch (eventData.moveDir)
             {
-                case MoveDirection.Left:
-                    if (SlideAxis == Axis.Horizontal && FindSelectableOnLeft() == null)
-                        Set(ReverseValue ? Value + StepSize : Value - StepSize);
-                    else
-                        base.OnMove(eventData);
+                case MoveDirection.Left when SlideAxis == Axis.Horizontal && FindSelectableOnLeft() == null:
+                    Set(ReverseValue ? Value + StepSize : Value - StepSize);
                     break;
-                case MoveDirection.Right:
-                    if (SlideAxis == Axis.Horizontal && FindSelectableOnRight() == null)
-                        Set(ReverseValue ? Value - StepSize : Value + StepSize);
-                    else
-                        base.OnMove(eventData);
+                case MoveDirection.Right when SlideAxis == Axis.Horizontal && FindSelectableOnRight() == null:
+                    Set(ReverseValue ? Value - StepSize : Value + StepSize);
                     break;
-                case MoveDirection.Up:
-                    if (SlideAxis == Axis.Vertical && FindSelectableOnUp() == null)
-                        Set(ReverseValue ? Value - StepSize : Value + StepSize);
-                    else
-                        base.OnMove(eventData);
+                case MoveDirection.Up when SlideAxis == Axis.Vertical && FindSelectableOnUp() == null:
+                    Set(ReverseValue ? Value - StepSize : Value + StepSize);
                     break;
-                case MoveDirection.Down:
-                    if (SlideAxis == Axis.Vertical && FindSelectableOnDown() == null)
-                        Set(ReverseValue ? Value + StepSize : Value - StepSize);
-                    else
-                        base.OnMove(eventData);
+                case MoveDirection.Down when SlideAxis == Axis.Vertical && FindSelectableOnDown() == null:
+                    Set(ReverseValue ? Value + StepSize : Value - StepSize);
+                    break;
+                default:
+                    base.OnMove(eventData);
                     break;
             }
         }

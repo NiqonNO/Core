@@ -1,3 +1,4 @@
+using NiqonNO.Core.UI.Utility;
 using NiqonNO.Core.Utility;
 using UnityEngine;
 using UnityEngine.Events;
@@ -371,29 +372,20 @@ namespace NiqonNO.Core.UI
 
             switch (eventData.moveDir)
             {
-                case MoveDirection.Left:
-                    if (FindSelectableOnLeft() == null)
-                        Set(Value + Vector3.left * StepSize);
-                    else
-                        base.OnMove(eventData);
+                case MoveDirection.Left when FindSelectableOnLeft() == null:
+                    Set(Value + new Vector3(0.5f, 0, -0.5f) * StepSize);
                     break;
-                case MoveDirection.Right:
-                    if (FindSelectableOnRight() == null)
-                        Set(Value + Vector3.back * StepSize);
-                    else
-                        base.OnMove(eventData);
+                case MoveDirection.Right when FindSelectableOnRight() == null:
+                    Set(Value + new Vector3(-0.5f, 0, 0.5f) * StepSize);
                     break;
-                case MoveDirection.Up:
-                    if (FindSelectableOnUp() == null)
-                        Set(Value + Vector3.up * StepSize);
-                    else
-                        base.OnMove(eventData);
+                case MoveDirection.Up when FindSelectableOnUp() == null:
+                    Set(Value + Vector3.up * StepSize);
                     break;
-                case MoveDirection.Down:
-                    if (FindSelectableOnDown() == null)
-                        Set(Value - Vector3.up * StepSize);
-                    else
-                        base.OnMove(eventData);
+                case MoveDirection.Down when FindSelectableOnDown() == null:
+                    Set(Value - Vector3.up * StepSize);
+                    break;
+                default:
+                    base.OnMove(eventData);
                     break;
             }
         }

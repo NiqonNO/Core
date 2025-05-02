@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace NiqonNO.Core.UI
+namespace NiqonNO.Core.UI.Utility
 {
-    internal static class NOMultipleDisplayUtilities
+    public static class NOMultipleDisplayUtilities
     {
         /// <summary>
         /// Converts the current drag position into a relative position for the display.
