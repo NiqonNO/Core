@@ -4,8 +4,8 @@ using UnityEditor.UI;
 
 namespace NiqonNO.Core.UI.Editor
 {
-    [CustomEditor(typeof(NOSlider), true)]
-    public class NOSliderEditor : SelectableEditor
+    [CustomEditor(typeof(NOSelectable), true)]
+    public class NOSelectableEditor : SelectableEditor
     {
         private PropertyTree propertyTree;
 
@@ -23,7 +23,7 @@ namespace NiqonNO.Core.UI.Editor
             propertyTree.BeginDraw(true);
             foreach (var inspectorProperty in propertyTree.EnumerateTree())
             {
-                if (typeof(NOSlider).IsAssignableFrom(inspectorProperty.Info.GetMemberInfo()?.DeclaringType))
+                if (typeof(NOSelectable).IsAssignableFrom(inspectorProperty.Info.GetMemberInfo()?.DeclaringType))
                 {
                     inspectorProperty.Draw();
                 }

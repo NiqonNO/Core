@@ -7,11 +7,10 @@ using UnityEngine.UI;
 
 namespace NiqonNO.Core.UI
 {
-    [AddComponentMenu("NiqonNO/UI/NOMask")]
     [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
     [DisallowMultipleComponent]
-    public class NOMask : Mask
+    public abstract class NOMask : Mask
     {
         public RectTransform RectTransform => rectTransform;
         public Graphic Graphic => graphic;

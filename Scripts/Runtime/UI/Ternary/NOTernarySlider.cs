@@ -10,7 +10,7 @@ namespace NiqonNO.Core.UI
     [AddComponentMenu("NiqonNO/UI/NOTernary")]
     [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
-    public class NOTernarySlider : Selectable, IDragHandler, IInitializePotentialDragHandler, ICanvasElement
+    public class NOTernarySlider : NOSelectable, IDragHandler, IInitializePotentialDragHandler, ICanvasElement
     {
         [SerializeField] 
         private RectTransform _HandleRect;
@@ -23,6 +23,14 @@ namespace NiqonNO.Core.UI
                 UpdateVisuals();
             });
         }
+        
+        [SerializeField]
+        private NOTernaryMask _ForegroundMask;
+        public NOTernaryMask ForegroundMask {
+            get => _ForegroundMask;
+            set => NOSetPropertyUtility.SetClass(ref _ForegroundMask, value, () => {
+                UpdateCachedReferences();
+                UpdateVisuals(); }); }
 
         [SerializeField] 
         private float _MinValue = 0;
@@ -98,7 +106,12 @@ namespace NiqonNO.Core.UI
 
         protected bool DelayedUpdateVisuals = false;
 
-        private float StepSize => WholeNumbers ? 1 : (MaxValue - MinValue) * 0.1f;
+        private Vector3  StepSizeVertical => WholeNumbers ? 
+            new Vector3(1.0f, 0.0f, -1.0f) : 
+            new Vector3(0.5f, 0.0f, -0.5f) * ((MaxValue - MinValue) * 0.1f);
+        private Vector3 StepSizeHorizontal => WholeNumbers ? 
+            new Vector3(-1.0f, 2.0f, -1.0f)  : 
+            new Vector3(-0.5f, 1.0f, -0.5f) * ((MaxValue - MinValue) * 0.1f);
 
 #if UNITY_EDITOR
         protected override void OnValidate()
@@ -198,6 +211,11 @@ namespace NiqonNO.Core.UI
             }
 
             GetSlideAreaCorners();
+            
+            if (_ForegroundMask)
+            {
+                _ForegroundMask.SetData(HandleContainerRect, _HandleRect);
+            }
         }
 
         Vector3 ClampValue(Vector3 input)
@@ -254,6 +272,7 @@ namespace NiqonNO.Core.UI
 
             UpdateHandle();
             GetSlideAreaCorners();
+            UpdateMask();
         }
 
         private void GetSlideAreaCorners()
@@ -288,6 +307,12 @@ namespace NiqonNO.Core.UI
             if (HandleContainerRect == null) return;
 
             SetHandleAnchorAndPosition(_HandleRect, NormalizedValue);
+        }
+        
+        protected virtual void UpdateMask()
+        {
+            if (_ForegroundMask == null) return;
+            _ForegroundMask.UpdateMaterialProperties();
         }
 
         protected virtual void SetHandleAnchorAndPosition(RectTransform rectTransform, Vector3 normalizedValue)
@@ -373,16 +398,16 @@ namespace NiqonNO.Core.UI
             switch (eventData.moveDir)
             {
                 case MoveDirection.Left when FindSelectableOnLeft() == null:
-                    Set(Value + new Vector3(0.5f, 0, -0.5f) * StepSize);
+                    Set(Value + StepSizeVertical);
                     break;
                 case MoveDirection.Right when FindSelectableOnRight() == null:
-                    Set(Value + new Vector3(-0.5f, 0, 0.5f) * StepSize);
+                    Set(Value - StepSizeVertical);
                     break;
                 case MoveDirection.Up when FindSelectableOnUp() == null:
-                    Set(Value + Vector3.up * StepSize);
+                    Set(Value + StepSizeHorizontal);
                     break;
                 case MoveDirection.Down when FindSelectableOnDown() == null:
-                    Set(Value - Vector3.up * StepSize);
+                    Set(Value - StepSizeHorizontal);
                     break;
                 default:
                     base.OnMove(eventData);

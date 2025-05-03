@@ -73,4 +73,11 @@ void SliderSlit_float(float2 position, float4 sliderCorners, float2 handlePositi
     alpha = saturate(alpha);
 }
 
+void TernarySlit_float(float2 position, float2 topCorner, float4 bottomCorners, float2 handlePositions, out float alpha)
+{
+    alpha = min(min(sdSegment(position, bottomCorners.xy, handlePositions), sdSegment(position, bottomCorners.zw, handlePositions)), sdSegment(position, topCorner.xy, handlePositions)) - 3;
+    alpha = opSmoothUnion(alpha, sdCircle(position, handlePositions) - 13, 30);
+    alpha = saturate(alpha);
+}
+
 #endif

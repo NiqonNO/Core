@@ -9,7 +9,7 @@ namespace NiqonNO.Core.UI
     [AddComponentMenu("NiqonNO/UI/NOSlider")]
     [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
-    public class  NOSlider : Selectable, IDragHandler, IInitializePotentialDragHandler, ICanvasElement
+    public class  NOSlider : NOSelectable, IDragHandler, IInitializePotentialDragHandler, ICanvasElement
     {
         [SerializeField]
         private RectTransform _FillRect;

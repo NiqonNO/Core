@@ -123,7 +123,7 @@ namespace NiqonNO.Core.Utility
             return LerpBarycentric(minValue, maxValue, NormaliseBarycentric(barycentric));
         }
 
-        public static Vector3 GetBarycentricCoordinates(Vector2 position, Vector2 p0, Vector2 p1, Vector2 p2)
+        public static Vector3 GetBarycentricCoordinates(Vector2 position, Vector2 p0, Vector2 p1, Vector2 p2, bool clampHorizontal = false)
         {
             Vector2 v0 = p1 - p0;
             Vector2 v1 = p2 - p0;
@@ -142,6 +142,12 @@ namespace NiqonNO.Core.Utility
 
             if (u < 0)
             {
+                if(clampHorizontal)
+                {
+                    float p = (position.y - p1.y) / (p2.y - p1.y);
+                    float x = Mathf.Lerp(p1.x, p2.x, p);
+                    position = new Vector2(x, position.y);
+                }
                 float t = Vector2.Dot(position - p1, p2 - p1) / Vector2.Dot(p2 - p1, p2 - p1);
                 t = Mathf.Clamp01(t);
                 return new Vector3(0.0f, 1.0f - t, t);
@@ -156,6 +162,12 @@ namespace NiqonNO.Core.Utility
 
             if (w < 0)
             {
+                if (clampHorizontal)
+                {
+                    float p = (position.y - p0.y) / (p1.y - p0.y);
+                    float x = Mathf.Lerp(p0.x, p1.x, p);
+                    position = new Vector2(x, position.y);
+                }
                 float t = Vector2.Dot(position - p0, p1 - p0) / Vector2.Dot(p1 - p0, p1 - p0);
                 t = Mathf.Clamp01(t);
                 return new Vector3(1.0f - t, t, 0.0f);
