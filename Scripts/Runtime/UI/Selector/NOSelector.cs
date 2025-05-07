@@ -149,7 +149,13 @@ namespace NiqonNO.Core.UI
 
             Initialize();
         }
-        
+
+        protected override void OnRectTransformDimensionsChange()
+        {
+            base.OnRectTransformDimensionsChange();
+            Relayout();
+        }
+
         protected virtual void Initialize() {}
         protected abstract void Relayout();
         protected abstract void Refresh();

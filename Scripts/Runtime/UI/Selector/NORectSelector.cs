@@ -17,13 +17,12 @@ namespace NiqonNO.Core.UI
         public LayoutGroup Layout => _Layout;
 
         public override int MaxPosition => Mathf.CeilToInt(ItemData.Count / CellsInRow);
+        private float ViewHeight => (CellSize + Spacing) * MaxPosition - Spacing;
         
         readonly IList<NOSelectorCell> CellPool = new List<NOSelectorCell>();
 
         private float CellSize;
         private float CellsInRow;
-        private float CellInterval;
-        private float ScrollOffset;
         private float Spacing = 0f;
         
         protected override void Initialize()
@@ -31,15 +30,11 @@ namespace NiqonNO.Core.UI
             ResizePool();
         }
 
-        protected override void OnRectTransformDimensionsChange()
+        protected override void Relayout()
         {
-            base.OnRectTransformDimensionsChange();
-            
             CellsInRow = 1;
-            var rect = CellContainer.rect;
             var cellRect = ((RectTransform)CellTemplate.transform).rect;
-            
-            var rectSizeParallel = rect.size[1 - (int)ScrollDirection];
+
             var cellSizeParallel = cellRect.size[1 - (int)ScrollDirection];
             var spacingParallel = 0.0f;
             
@@ -47,26 +42,38 @@ namespace NiqonNO.Core.UI
             {
                 case GridLayoutGroup gridLayout:
                 {
-                    var rectSizePerpendicular = rect.size[(int)ScrollDirection];
-                    var paddingPerpendicular = ScrollDirection == ScrollDirection.Vertical ? Layout.padding.horizontal : Layout.padding.vertical;
-                    var spacingPerpendicular = gridLayout.spacing[(int)ScrollDirection];
-                    var cellSizePerpendicular = gridLayout.cellSize[(int)ScrollDirection];
-                    cellSizeParallel = gridLayout.cellSize[1 - (int)ScrollDirection];
-                    CellsInRow = Mathf.Max(1, Mathf.Floor((rectSizePerpendicular + spacingPerpendicular - paddingPerpendicular) / (cellSizePerpendicular + spacingPerpendicular)));
+                    switch (gridLayout.constraint)
+                    {
+                        case GridLayoutGroup.Constraint.FixedColumnCount when ScrollDirection == ScrollDirection.Vertical:
+                        case GridLayoutGroup.Constraint.FixedRowCount when ScrollDirection == ScrollDirection.Horizontal:
+                            CellsInRow = Mathf.Max(1,gridLayout.constraintCount);
+                            break;
+                        case GridLayoutGroup.Constraint.Flexible:
+                        default:
+                            var rectSizePerpendicular = CellContainer.rect.size[(int)ScrollDirection];
+                            var paddingPerpendicular = ScrollDirection == ScrollDirection.Vertical ? Layout.padding.horizontal : Layout.padding.vertical;
+                            var spacingPerpendicular = gridLayout.spacing[(int)ScrollDirection];
+                            var cellSizePerpendicular = gridLayout.cellSize[(int)ScrollDirection];
+                            spacingParallel = gridLayout.spacing[1 - (int)ScrollDirection];
+                            cellSizeParallel = gridLayout.cellSize[1 - (int)ScrollDirection];
+                            CellsInRow = Mathf.Max(1, Mathf.Floor((rectSizePerpendicular + spacingPerpendicular - paddingPerpendicular) / (cellSizePerpendicular + spacingPerpendicular)));
+                            break;
+                    }
                     break;
                 }
                 case HorizontalOrVerticalLayoutGroup hvLayout:
+                {
                     spacingParallel = hvLayout.spacing;
                     break;
+                }
             }
             
-            CellInterval = (cellSizeParallel + spacingParallel) / rectSizeParallel;
-            ScrollOffset = CellInterval;
             CellSize = cellSizeParallel;
             Spacing = spacingParallel;
-        }
 
-        protected override void Relayout() => UpdateRect();
+            JumpTo(SelectedIndex);
+        }
+        
         protected override void Refresh() => UpdateRect(true);
         protected override void OnUpdatePosition()
         {
@@ -103,8 +110,31 @@ namespace NiqonNO.Core.UI
             }
 
             var anchoredPosition = CellContainer.anchoredPosition;
-            anchoredPosition.y = Position / MaxPosition * CellContainer.rect.height;
+            anchoredPosition.y = Position / MaxPosition * ViewHeight;
             CellContainer.anchoredPosition = anchoredPosition;
+        }
+
+        public override void ScrollTo(float position, float duration, EasingFunction easingFunction,
+            Action onComplete = null)
+        {
+            base.ScrollTo(TransformPosition(position), duration, easingFunction, onComplete);
+            UpdateSelection(Mathf.RoundToInt(position));
+        }
+
+        private float TransformPosition(float position)
+        {
+            return Mathf.FloorToInt(position / CellsInRow);
+        }
+
+        public override void JumpTo(int index)
+        {
+            if (index < 0 || index > TotalCount - 1)
+            {
+                return;
+            }
+
+            UpdateSelection(index);
+            Position = TransformPosition(index);
         }
     }
 }
