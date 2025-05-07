@@ -37,8 +37,8 @@ namespace NiqonNO.Core.UI
 
         [Space]
         [SerializeField]
-        private Slider.Direction _Direction = Slider.Direction.LeftToRight;
-        public Slider.Direction Direction {
+        private SliderDirection _Direction = SliderDirection.LeftToRight;
+        public SliderDirection Direction {
             get => _Direction;
             set => NOSetPropertyUtility.SetStruct(ref _Direction, value, UpdateVisuals); }
 
@@ -92,8 +92,8 @@ namespace NiqonNO.Core.UI
         
         protected Vector2 Offset = Vector2.zero;
         
-        protected Axis SlideAxis => (_Direction == Slider.Direction.LeftToRight || _Direction == Slider.Direction.RightToLeft) ? Axis.Horizontal : Axis.Vertical;
-        protected bool ReverseValue => _Direction == Slider.Direction.RightToLeft || _Direction == Slider.Direction.TopToBottom;
+        protected Axis SlideAxis => (_Direction == SliderDirection.LeftToRight || _Direction == SliderDirection.RightToLeft) ? Axis.Horizontal : Axis.Vertical;
+        protected bool ReverseValue => _Direction == SliderDirection.RightToLeft || _Direction == SliderDirection.TopToBottom;
         
         #pragma warning disable 649
         protected DrivenRectTransformTracker Tracker;
@@ -447,7 +447,7 @@ namespace NiqonNO.Core.UI
             eventData.useDragThreshold = false;
         }
 
-        public void SetDirection(Slider.Direction direction, bool includeRectLayouts)
+        public void SetDirection(SliderDirection direction, bool includeRectLayouts)
         {
             Axis oldAxis = SlideAxis;
             bool oldReverse = ReverseValue;
