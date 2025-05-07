@@ -26,7 +26,7 @@ namespace NiqonNO.Core.UI
 
         private void SelectCell()
         {
-            Context.ScrollTo(-((RectTransform)transform).anchoredPosition[1-(int)Context.ScrollDirection]);
+            Context.ScrollTo(Index);
         }
     }
 }

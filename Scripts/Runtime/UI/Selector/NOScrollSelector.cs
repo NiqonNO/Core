@@ -6,11 +6,14 @@ namespace NiqonNO.Core.UI
 {
     public class NOScrollSelector : NOSelector
     {
-        [SerializeField, Range(1e-2f, 1f)] protected float CellInterval = 0.2f;
+        [SerializeField, Range(1e-2f, 1f)] 
+        protected float CellInterval = 0.2f;
 
-        [SerializeField, Range(0f, 1f)] protected float ScrollOffset = 0.5f;
+        [SerializeField, Range(0f, 1f)] 
+        protected float ScrollOffset = 0.5f;
 
-        [SerializeField] protected bool Loop = false;
+        [SerializeField] 
+        protected bool Loop = false;
         
         [SerializeField] 
         private UnityEvent<int> _OnHighlightedItemChanged = new();
@@ -20,25 +23,34 @@ namespace NiqonNO.Core.UI
             set => _OnHighlightedItemChanged = value;
         }
 
-        public override float MaxPosition => TotalCount;
-        readonly IList<NOSelectorCell> pool = new List<NOSelectorCell>();
+        public override int MaxPosition => TotalCount;
+        readonly IList<NOSelectorCell> CellPool = new List<NOSelectorCell>();
 
         public int HighlightedIndex { get; private set; } = -1;
 
         protected override void Relayout() => HandleCells();
         protected override void Refresh() => HandleCells(true);
-
         protected override void OnUpdatePosition()
         {
-            HighlightedIndex =  (int)CircularPosition(Mathf.RoundToInt(CurrentPosition));
+            var position = Position;
+            if(MovementType == MovementType.Elastic)
+            {
+                position = Mathf.Clamp(position, 0, MaxPosition - 1);
+            }
+            HighlightedIndex =  (int)CircularPosition(Mathf.RoundToInt(position));
             HandleCells(true);
             OnHighlightedItemChanged.Invoke(HighlightedIndex);
         }
-
         protected override void OnUpdateSelection() 
         {
             HighlightedIndex = SelectedIndex;
             Refresh();
+        }
+        
+        protected override void PositionMovementStopped(float position)
+        {
+            int index = Mathf.RoundToInt(CircularPosition(position));
+            UpdateSelection(index);
         }
 
         public void ScrollDown() => ScrollTo(HighlightedIndex - 1);
@@ -50,20 +62,19 @@ namespace NiqonNO.Core.UI
             var firstIndex = Mathf.CeilToInt(p);
             var firstPosition = (Mathf.Ceil(p) - p) * CellInterval;
 
-            if (firstPosition + pool.Count * CellInterval < 1f)
+            if (firstPosition + CellPool.Count * CellInterval < 1f)
             {
                 ResizePool(firstPosition);
             }
 
             UpdateCells(firstPosition, firstIndex, forceRefresh);
         }
-
         void ResizePool(float firstPosition)
         {
             Debug.Assert(CellTemplate != null);
             Debug.Assert(CellContainer != null);
 
-            var addCount = Mathf.CeilToInt((1f - firstPosition) / CellInterval) - pool.Count;
+            var addCount = Mathf.CeilToInt((1f - firstPosition) / CellInterval) - CellPool.Count;
             for (var i = 0; i < addCount; i++)
             {
                 var cell = Instantiate(CellTemplate, CellContainer);
@@ -71,17 +82,16 @@ namespace NiqonNO.Core.UI
                 cell.SetContext(this);
                 cell.Initialize();
                 cell.SetVisible(false);
-                pool.Add(cell);
+                CellPool.Add(cell);
             }
         }
-
         void UpdateCells(float firstPosition, int firstIndex, bool forceRefresh)
         {
-            for (var i = 0; i < pool.Count; i++)
+            for (var i = 0; i < CellPool.Count; i++)
             {
                 var index = firstIndex + i;
                 var position = firstPosition + i * CellInterval;
-                var cell = pool[CircularIndex(index, pool.Count)];
+                var cell = CellPool[CircularIndex(index, CellPool.Count)];
 
                 if (Loop)
                 {
@@ -118,24 +128,5 @@ namespace NiqonNO.Core.UI
         }
 
         protected int CircularIndex(int i, int count) => Mathf.RoundToInt(CircularPosition(i, count));
-        
-#if UNITY_EDITOR
-        bool cachedLoop;
-        float cachedCellInterval, cachedScrollOffset;
-
-        void LateUpdate()
-        {
-            if (cachedLoop != Loop ||
-                cachedCellInterval != CellInterval ||
-                cachedScrollOffset != ScrollOffset)
-            {
-                cachedLoop = Loop;
-                cachedCellInterval = CellInterval;
-                cachedScrollOffset = ScrollOffset;
-
-                HandleCells();
-            }
-        }
-#endif
     }
 }

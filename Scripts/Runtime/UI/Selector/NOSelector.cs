@@ -126,14 +126,14 @@ namespace NiqonNO.Core.UI
         }
 
         public int TotalCount => ItemData.Count;
-        public abstract float MaxPosition { get; }
+        public abstract int MaxPosition { get; }
         protected RectTransform CellContainer => (RectTransform)CellTemplate.transform.parent;
         public int SelectedIndex { get; private set; } = -1;
 
         Vector2 BeginDragPointerPosition;
         float ScrollStartPosition;
         float PrevPosition;
-        protected float CurrentPosition;
+        float CurrentPosition;
 
         bool Hold;
         bool Scrolling;
@@ -150,24 +150,24 @@ namespace NiqonNO.Core.UI
             Initialize();
         }
         
-        protected void UpdatePosition(float position)
+        protected virtual void Initialize() {}
+        protected abstract void Relayout();
+        protected abstract void Refresh();
+        protected virtual void OnUpdatePosition() { }
+        protected virtual void OnUpdateSelection() { }
+        protected virtual void PositionMovementStopped(float position) { }
+        
+        void UpdatePosition(float position)
         {
             CurrentPosition = position;
             OnUpdatePosition();
         }
-
         protected void UpdateSelection(int index)
         {
             SelectedIndex = index;
             OnUpdateSelection();
             OnItemSelected.Invoke(SelectedIndex);
         }
-        
-        protected virtual void Initialize() {}
-        protected abstract void Relayout();
-        protected abstract void Refresh();
-        protected virtual void OnUpdatePosition() { }
-        protected virtual void OnUpdateSelection() { }
         
         public virtual void ScrollTo(float position, Action onComplete = null) => ScrollTo(position, Snap.Duration, Snap.Easing, onComplete);
         public virtual void ScrollTo(float position, float duration, Action onComplete = null) => ScrollTo(position, duration, Ease.OutCubic, onComplete);
@@ -192,7 +192,7 @@ namespace NiqonNO.Core.UI
             Velocity = 0f;
             ScrollStartPosition = CurrentPosition;
 
-            UpdateSelection(Mathf.RoundToInt(CircularPosition(AutoScroll.EndPosition)));
+            PositionMovementStopped(AutoScroll.EndPosition);
         }
         public virtual void JumpTo(int index)
         {
@@ -225,7 +225,7 @@ namespace NiqonNO.Core.UI
 
             if (Hold && Snap.Enable)
             {
-                UpdateSelection(Mathf.RoundToInt(CircularPosition(CurrentPosition)));
+                PositionMovementStopped(CurrentPosition);
                 ScrollTo(Mathf.RoundToInt(CurrentPosition), Snap.Duration, Snap.Easing);
             }
 
@@ -417,7 +417,7 @@ namespace NiqonNO.Core.UI
             AutoScroll.Enable = true;
             AutoScroll.Elastic = true;
 
-            UpdateSelection(Mathf.Clamp(Mathf.RoundToInt(position), 0, TotalCount - 1));
+            PositionMovementStopped(Mathf.Clamp(position, 0, MaxPosition - 1));
         }
         private void HandleFreeMovementInertia(float deltaTime, ref float position)
         {
@@ -442,10 +442,10 @@ namespace NiqonNO.Core.UI
             if (!Mathf.Approximately(position, 0f) && !Mathf.Approximately(position, MaxPosition - 1f)) return;
             
             Velocity = 0f;
-            UpdateSelection(Mathf.RoundToInt(position));
+            PositionMovementStopped(position);
         }
 
-        protected float CalculateOffset(float position)
+        float CalculateOffset(float position)
         {
             if (_MovementType == MovementType.Unrestricted)
             {
