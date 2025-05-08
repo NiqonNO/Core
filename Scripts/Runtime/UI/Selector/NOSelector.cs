@@ -4,11 +4,12 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace NiqonNO.Core.UI
 {
     public abstract class NOSelector : NOUIBehaviour, IPointerUpHandler, IPointerDownHandler, IBeginDragHandler,
-        IEndDragHandler, IDragHandler, IScrollHandler
+        IEndDragHandler, IDragHandler, IScrollHandler, ICanvasElement
     {
         protected readonly AutoScrollState AutoScroll = new AutoScrollState();
         static readonly EasingFunction DefaultEasingFunction = NOEasing.Get(Ease.OutCubic);
@@ -18,20 +19,13 @@ namespace NiqonNO.Core.UI
         public RectTransform Viewport
         {
             get => _Viewport;
-            set => _Viewport = value /*NOSetPropertyUtility.SetClass(ref _Viewport, value, () => {
-                UpdateCachedReferences();
-                UpdateVisuals(); })*/;}
-        public float ViewportSize => _ScrollDirection == ScrollDirection.Horizontal
-            ? Viewport.rect.size.x
-            : Viewport.rect.size.y;
+            set => _Viewport = value;}
         
         [SerializeField, ChildGameObjectsOnly]
         private NOSelectorCell _CellTemplate;
         public NOSelectorCell CellTemplate {
             get => _CellTemplate;
-            set => _CellTemplate = value /*NOSetPropertyUtility.SetClass(ref _CellTemplate, value, () => {
-                UpdateCachedReferences();
-                UpdateVisuals(); })*/;}
+            set => _CellTemplate = value;}
 
         [SerializeField] 
         NODataProviderCollection _ItemData = default;
@@ -125,10 +119,21 @@ namespace NiqonNO.Core.UI
             }
         }
 
+        
+        public bool LayoutReady { get; private set; }
+        
         public int TotalCount => ItemData.Count;
         public abstract int MaxPosition { get; }
-        protected RectTransform CellContainer => (RectTransform)CellTemplate.transform.parent;
         public int SelectedIndex { get; private set; } = -1;
+        public float ViewportSize => _ScrollDirection == ScrollDirection.Horizontal
+            ? ViewportRect.size.x
+            : ViewportRect.size.y;
+
+        protected Rect ViewportRect;
+        private RectTransform Cell;
+        protected Rect CellRect;
+        protected RectTransform CellContainer;
+        protected Rect CellContainerRect;
 
         Vector2 BeginDragPointerPosition;
         float ScrollStartPosition;
@@ -143,22 +148,40 @@ namespace NiqonNO.Core.UI
         protected override void Start()
         {
             base.Start();
+            Cell = ((RectTransform)CellTemplate.transform);
+            CellRect = Cell.rect;
+            CellContainer = (RectTransform)Cell.parent;
             
             CellTemplate.gameObject.SetActive(false);
-            JumpTo(0);
-
             Initialize();
+        }
+
+        protected override void OnEnable() => CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this);
+        protected override void OnDisable() => CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
+
+        public void Rebuild(CanvasUpdate executing) {}
+        public void GraphicUpdateComplete() {}
+        public void LayoutComplete()
+        {
+            LayoutReady = true;
+            Relayout();
+            JumpTo(0);
         }
 
         protected override void OnRectTransformDimensionsChange()
         {
-            base.OnRectTransformDimensionsChange();
+            if (!LayoutReady)
+                return;
             Relayout();
         }
 
         protected virtual void Initialize() {}
-        protected abstract void Relayout();
-        protected abstract void Refresh();
+
+        protected virtual void Relayout()
+        {
+            ViewportRect = Viewport.rect;
+            CellContainerRect = CellContainer.rect;
+        }
         protected virtual void OnUpdatePosition() { }
         protected virtual void OnUpdateSelection() { }
         protected virtual void PositionMovementStopped(float position) { }

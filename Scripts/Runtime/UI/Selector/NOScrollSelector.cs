@@ -28,8 +28,11 @@ namespace NiqonNO.Core.UI
 
         public int HighlightedIndex { get; private set; } = -1;
 
-        protected override void Relayout() => HandleCells();
-        protected override void Refresh() => HandleCells(true);
+        protected override void Relayout()
+        {
+            base.Relayout();
+            HandleCells();
+        }
         protected override void OnUpdatePosition()
         {
             var position = Position;
@@ -44,7 +47,7 @@ namespace NiqonNO.Core.UI
         protected override void OnUpdateSelection() 
         {
             HighlightedIndex = SelectedIndex;
-            Refresh();
+            HandleCells(true);
         }
         
         protected override void PositionMovementStopped(float position)
