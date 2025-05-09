@@ -6,9 +6,13 @@ namespace NiqonNO.Core
     public class NODataProviderCollection : NOScriptableObject
     {
         [SerializeField] 
-        List<NODataProvider> ItemData = default;
-
+        private List<NODataProvider> ItemData = default;
         public int Count => ItemData.Count;
-        public NODataProvider GetDataAt(int index) => ItemData[index];
+        
+        protected T GetDataAt<T>(int index) where T : NODataProvider
+        {
+            return ItemData[index] as T;
+        }
+        public NODataProvider GetDataAt(int index) => GetDataAt<NODataProvider>(index);
     }
 }
