@@ -6,6 +6,8 @@ namespace NiqonNO.Core.UI
     {
         [NOMVVMBind] 
         protected string ItemIndex => $"{Index + 1}/{Context.TotalCount}";
+        [NOMVVMBind] 
+        protected bool Selected => Index == Context.SelectedIndex;
         
         public int Index { get; set; } = -1;
         public virtual bool IsVisible => gameObject.activeSelf;
