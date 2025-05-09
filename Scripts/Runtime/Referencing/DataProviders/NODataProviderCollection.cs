@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace NiqonNO.Core
 {
-    public class NODataProviderCollection : NOScriptableObject
+    public class NODataProviderCollection : NOEventAsset<NODataProvider>
     {
         [SerializeField] 
         private List<NODataProvider> ItemData = default;
