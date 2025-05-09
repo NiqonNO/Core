@@ -128,6 +128,9 @@ namespace NiqonNO.Core.UI
         public float ViewportSize => _ScrollDirection == ScrollDirection.Horizontal
             ? ViewportRect.size.x
             : ViewportRect.size.y;
+        public float CellContainerSize => _ScrollDirection == ScrollDirection.Horizontal
+            ? CellContainerRect.size.x
+            : CellContainerRect.size.y;
 
         protected Rect ViewportRect;
         private RectTransform Cell;
@@ -359,7 +362,7 @@ namespace NiqonNO.Core.UI
             Dragging = false;
         }
 
-        void Update()
+        protected virtual void Update()
         {
             var deltaTime = Time.unscaledDeltaTime;
             var offset = CalculateOffset(CurrentPosition);

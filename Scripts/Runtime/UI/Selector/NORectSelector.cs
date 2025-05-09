@@ -16,8 +16,8 @@ namespace NiqonNO.Core.UI
         LayoutGroup _Layout = default;
         public LayoutGroup Layout => _Layout;
 
-        public override int MaxPosition => Mathf.CeilToInt(ItemData.Count / CellsInRow);
-        private float ViewHeight => (CellSize + Spacing) * MaxPosition - Spacing;
+        public override int MaxPosition => (CellContainerSize <= ViewportSize) ? 1 : Mathf.CeilToInt(ItemData.Count / CellsInRow);
+        private int MaxMinusOne => Mathf.Max(1, MaxPosition - 1);
         
         readonly IList<NOSelectorCell> CellPool = new List<NOSelectorCell>();
 
@@ -41,7 +41,7 @@ namespace NiqonNO.Core.UI
         private void OnScrollbar(float position)
         {
             UpdateScrollbar = false;
-            Position = position * (MaxPosition - 1);
+            Position = position * MaxMinusOne;
             UpdateScrollbar = true;
         }
 
@@ -88,7 +88,7 @@ namespace NiqonNO.Core.UI
             
             if (Scrollbar)
             {
-                Scrollbar.size = Mathf.Clamp(ViewportSize / CellContainerRect.size[1 - (int)ScrollDirection], 0.1f, 1);
+                Scrollbar.size = Mathf.Clamp(ViewportSize / CellContainerSize, 0.1f, 1);
             }
 
             JumpTo(SelectedIndex);
@@ -101,6 +101,12 @@ namespace NiqonNO.Core.UI
         protected override void OnUpdateSelection() 
         {
             UpdateRect(true);
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            UpdateSliderVisibility();
         }
 
         void ResizePool()
@@ -131,33 +137,39 @@ namespace NiqonNO.Core.UI
                 CellPool[index].SetVisible(false);
             }
         }
+
+        void UpdateSliderVisibility()
+        {
+            bool shouldShowScrollbar = CellContainerSize > ViewportSize;
+            if (Scrollbar.gameObject.activeSelf != shouldShowScrollbar)
+            {
+                Scrollbar.gameObject.SetActive(shouldShowScrollbar);
+            }
+        }
+        
         void UpdateRect(bool forceRefresh = false)
         {
             var scrollAxis = 1 - (int)ScrollDirection;
-
-            var slideArea = (CellContainerRect.size[scrollAxis] - ViewportSize);
-            var pos = Position / (MaxPosition - 1);
+            var slideArea = Mathf.Max(10,CellContainerSize - ViewportSize);
+            var pos = Position / MaxMinusOne;
             var offset = pos * slideArea;
 
-            if (Mathf.Min(offset, slideArea - offset) > 1)
-            {
-                var rowPos = PaddingHead + Position * (CellSize + Spacing);
-                offset = rowPos - (ViewportSize - CellSize) / 2f;
-            }
-            
             var anchoredPosition = CellContainer.anchoredPosition;
             anchoredPosition[scrollAxis] = offset;
             CellContainer.anchoredPosition = anchoredPosition;
 
-            if (Scrollbar && UpdateScrollbar)
+            if (UpdateScrollbar && Scrollbar && Scrollbar.gameObject.activeSelf);
             {
-                Scrollbar.SetValueWithoutNotify(offset / slideArea);
+                var sliderVal = offset / slideArea;
+                var normalizedVal = Mathf.Clamp01(sliderVal);
+                Scrollbar.SetValueWithoutNotify(normalizedVal);
+                Scrollbar.size = Mathf.Clamp(ViewportSize / CellContainerSize - Mathf.Abs(sliderVal - normalizedVal) * Elasticity, 0.1f, 1);
             }
-            
+
             if (!forceRefresh) return;
             foreach (var t in CellPool)
             {
-                if(t.IsVisible)
+                if (t.IsVisible)
                     t.OnViewModelChange();
             }
         }
@@ -165,7 +177,7 @@ namespace NiqonNO.Core.UI
         public override void ScrollTo(float position, float duration, EasingFunction easingFunction,
             Action onComplete = null)
         {
-            base.ScrollTo(TransformPosition(position), duration, easingFunction, onComplete);
+            base.ScrollTo(CenterOnPosition(position), duration, easingFunction, onComplete);
             UpdateSelection(Mathf.RoundToInt(position));
         }
 
@@ -177,12 +189,20 @@ namespace NiqonNO.Core.UI
             }
 
             UpdateSelection(index);
-            Position = TransformPosition(index);
+            Position = CenterOnPosition(index);
         }
         
-        private float TransformPosition(float position)
+        private float CenterOnPosition(float position)
         {
-            return Mathf.FloorToInt(position / CellsInRow);
+            float rowIndex = Mathf.Floor(position / CellsInRow);
+            float cellOffset = rowIndex * (CellSize + Spacing);
+            float targetPosition = PaddingHead + cellOffset;
+
+            float scrollableRange = CellContainerSize - ViewportSize;
+            float centeredOffset = targetPosition - (ViewportSize - CellSize) * 0.5f;
+
+            float normalized = Mathf.Clamp01(centeredOffset / scrollableRange);
+            return normalized * MaxMinusOne;
         }
     }
 }
