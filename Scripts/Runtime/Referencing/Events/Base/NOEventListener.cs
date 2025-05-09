@@ -1,30 +1,19 @@
-using UnityEngine;
-using UnityEngine.Events;
+﻿using System;
 
 namespace NiqonNO.Core
 {
-    public abstract class NOEventListener<T1, T2> : NOMonoBehaviour, INOEventListener where T1 : NOEventAsset where T2 : UnityEvent
+    public class NOEventListener<T> : INOEventListener<T>
     {
-        [SerializeField]
-        private T1 EventAsset;
-        [SerializeField] 
-        private T2 UnityResponseEvent;
-        
-        private void OnEnable()
+        private Action<T> Response;
+
+        public NOEventListener(Action<T> response)
         {
-            if (EventAsset == null) return;
-            EventAsset.RegisterListener(this);
+            Response = response;
         }
         
-        private void OnDisable()
+        public void OnEventRaised(T item)
         {
-            if (EventAsset == null) return;
-            EventAsset.UnregisterListener(this);
-        }
-        
-        public void OnEventRaised()
-        {
-            UnityResponseEvent?.Invoke();
+            Response.Invoke(item);
         }
     }
 }
