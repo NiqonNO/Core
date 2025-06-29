@@ -15,16 +15,4 @@ namespace NiqonNO.Core
         [NOMVVMBind] 
         protected Color ItemColor => ItemData.ItemColor;
     }
-    
-    public class NODataProviderViewModel : NOMVVMBaseViewModel<NODataProvider>
-    {
-        [NOMVVMBind] 
-        protected string ItemName => ItemData.ItemName;
-        
-        [NOMVVMBind] 
-        protected Sprite ItemIcon => ItemData.ItemIcon;
-        
-        [NOMVVMBind] 
-        protected Color ItemColor => ItemData.ItemColor;
-    }
 }

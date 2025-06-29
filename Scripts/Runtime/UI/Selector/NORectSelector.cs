@@ -158,7 +158,7 @@ namespace NiqonNO.Core.UI
             anchoredPosition[scrollAxis] = offset;
             CellContainer.anchoredPosition = anchoredPosition;
 
-            if (UpdateScrollbar && Scrollbar && Scrollbar.gameObject.activeSelf);
+            if (UpdateScrollbar && Scrollbar && Scrollbar.gameObject.activeSelf)
             {
                 var sliderVal = offset / slideArea;
                 var normalizedVal = Mathf.Clamp01(sliderVal);

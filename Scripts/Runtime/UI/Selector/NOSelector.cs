@@ -28,8 +28,8 @@ namespace NiqonNO.Core.UI
             set => _CellTemplate = value;}
 
         [SerializeField] 
-        NODataProviderCollection _ItemData = default;
-        public NODataProviderCollection ItemData => _ItemData;
+        NODataProviderCollection<NODataProvider> _ItemData = default;
+        public NODataProviderCollection<NODataProvider> ItemData => _ItemData;
         
         [SerializeField] 
         ScrollDirection _ScrollDirection = ScrollDirection.Vertical;

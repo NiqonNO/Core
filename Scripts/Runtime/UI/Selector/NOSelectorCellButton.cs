@@ -15,8 +15,6 @@ namespace NiqonNO.Core.UI
         Button Button;
         
         [NOMVVMBind] 
-        protected bool Selected => Index == Context.SelectedIndex;
-        [NOMVVMBind] 
         protected Color BackgroundColor => Selected ? SelectedColor : NeutralColor;
         
         public override void Initialize()
