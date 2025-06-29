@@ -28,8 +28,8 @@ namespace NiqonNO.Core.UI
             set => _CellTemplate = value;}
 
         [SerializeField] 
-        NODataProviderCollection _ItemData = default;
-        public NODataProviderCollection ItemData => _ItemData;
+        NODataProviderCollectionBase _ItemData = default;
+        public NODataProviderCollectionBase ItemData => _ItemData;
         
         [SerializeField] 
         ScrollDirection _ScrollDirection = ScrollDirection.Vertical;
@@ -178,6 +178,20 @@ namespace NiqonNO.Core.UI
             Relayout();
         }
 
+        public void SetData(NODataProvider newDataContainer)
+        {
+            if(newDataContainer is INODataProviderCollectionContainer newData)
+                SetData(newData.DataCollection);
+        }
+
+        public void SetData(NODataProviderCollectionBase newData)
+        {
+            _ItemData = newData;
+            Initialize();
+            Relayout();
+            JumpTo(0);
+        }
+
         protected virtual void Initialize() {}
 
         protected virtual void Relayout()
@@ -198,6 +212,7 @@ namespace NiqonNO.Core.UI
         {
             SelectedIndex = index;
             OnUpdateSelection();
+            ItemData.Raise(ItemData.GetGenericDataAt(SelectedIndex));
             OnItemSelected.Invoke(SelectedIndex);
         }
         

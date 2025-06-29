@@ -1,15 +1,9 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace NiqonNO.Core
 {
-    public abstract class NODataProviderCollection : NOEventAsset<NODataProvider>
-    {
-        public abstract int Count { get;  }
-        public abstract NODataProvider GetGenericDataAt(int index);
-    }
-    
-    public class NODataProviderCollection<T> : NODataProviderCollection where T : NODataProvider
+    public class NODataProviderCollection<T> : NODataProviderCollectionBase where T : NODataProvider
     {
         [SerializeField] 
         private List<T> ItemData = default;
