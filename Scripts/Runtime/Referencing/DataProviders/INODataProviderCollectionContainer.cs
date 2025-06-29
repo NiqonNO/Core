@@ -2,6 +2,6 @@
 {
     public interface INODataProviderCollectionContainer
     {
-        public NODataProvider DataCollection { get; }
+        public NODataProviderCollectionBase DataCollection { get; }
     }
 }
