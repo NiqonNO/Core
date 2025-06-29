@@ -3,15 +3,20 @@ using UnityEngine;
 
 namespace NiqonNO.Core
 {
-    public class NODataProviderCollection<T> : NOEventAsset<T> where T : NODataProvider
+    public abstract class NODataProviderCollection : NOEventAsset<NODataProvider>
+    {
+        public abstract int Count { get;  }
+        public abstract NODataProvider GetGenericDataAt(int index);
+    }
+    
+    public class NODataProviderCollection<T> : NODataProviderCollection where T : NODataProvider
     {
         [SerializeField] 
         private List<T> ItemData = default;
-        public int Count => ItemData.Count;
+        public override int Count => ItemData.Count;
+
         
-        public T GetDataAt(int index)
-        {
-            return ItemData[index];
-        }
+        public T GetDataAt(int index) =>  ItemData[index];
+        public override NODataProvider GetGenericDataAt(int index) => GetDataAt(index);
     }
 }

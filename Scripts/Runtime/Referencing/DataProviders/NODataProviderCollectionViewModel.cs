@@ -16,8 +16,8 @@ namespace NiqonNO.Core
         protected Color ItemColor => ItemData.ItemColor;
         
         [SerializeField] 
-        private NODataProviderCollection<NODataProvider> ItemCollection;
+        private NODataProviderCollection ItemCollection;
 
-        public void SetData(int index) => SetData(ItemCollection.GetDataAt(index));
+        public void SetData(int index) => SetData(ItemCollection.GetGenericDataAt(index));
     }
 }

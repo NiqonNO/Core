@@ -116,7 +116,7 @@ namespace NiqonNO.Core.UI
                 if (cell.Index != index)
                 {
                     cell.Index = index;
-                    cell.SetData(ItemData.GetDataAt(index));
+                    cell.SetData(ItemData.GetGenericDataAt(index));
                 }
                 else if (forceRefresh)
                 {
