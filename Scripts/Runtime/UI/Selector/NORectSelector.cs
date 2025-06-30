@@ -128,7 +128,7 @@ namespace NiqonNO.Core.UI
                 cell.SetContext(this);
                 cell.Initialize();
                 cell.Index = index;
-                cell.SetData(ItemData.GetGenericDataAt(index));
+                cell.SetData(ItemData.GetDataAt(index));
                 cell.SetVisible(true);
             }
 
