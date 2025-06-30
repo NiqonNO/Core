@@ -28,8 +28,8 @@ namespace NiqonNO.Core.UI
             set => _CellTemplate = value;}
 
         [SerializeField] 
-        NODataProviderCollectionBase _ItemData = default;
-        public NODataProviderCollectionBase ItemData => _ItemData;
+        NODataCollectionBase _ItemData = default;
+        public NODataCollectionBase ItemData => _ItemData;
         
         [SerializeField] 
         ScrollDirection _ScrollDirection = ScrollDirection.Vertical;
@@ -180,11 +180,11 @@ namespace NiqonNO.Core.UI
 
         public void SetData(NODataProvider newDataContainer)
         {
-            if(newDataContainer is INODataProviderCollectionContainer newData)
+            if(newDataContainer is INODataCollectionProvider newData)
                 SetData(newData.DataCollection);
         }
 
-        public void SetData(NODataProviderCollectionBase newData)
+        public void SetData(NODataCollectionBase newData)
         {
             _ItemData = newData;
             Initialize();

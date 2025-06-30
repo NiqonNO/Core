@@ -2,5 +2,5 @@
 
 namespace NiqonNO.Core
 {
-    public class NODataProviderEventListenerComponent : NOEventListenerComponent<NODataProvider, NODataProviderCollectionBase, UnityEvent<NODataProvider>> { }
+    public class NODataProviderEventListenerComponent : NOEventListenerComponent<NODataProvider, NODataCollectionBase, UnityEvent<NODataProvider>> { }
 }

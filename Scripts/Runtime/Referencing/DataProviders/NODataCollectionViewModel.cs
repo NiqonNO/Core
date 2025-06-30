@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace NiqonNO.Core
 {
-    public class NODataProviderCollectionViewModel : NOMVVMBaseViewModel<NODataProvider>
+    public class NODataCollectionViewModel : NOMVVMBaseViewModel<NODataProvider>
     {
         [NOMVVMBind] 
         protected string ItemName => ItemData.ItemName;
@@ -16,7 +16,7 @@ namespace NiqonNO.Core
         protected Color ItemColor => ItemData.ItemColor;
         
         [SerializeField] 
-        private NODataProviderCollectionBase ItemCollectionBase;
+        private NODataCollectionBase ItemCollectionBase;
 
         public void SetData(int index) => SetData(ItemCollectionBase.GetGenericDataAt(index));
     }
