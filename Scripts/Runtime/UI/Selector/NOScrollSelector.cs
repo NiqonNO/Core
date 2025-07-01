@@ -16,8 +16,8 @@ namespace NiqonNO.Core.UI
         protected bool Loop = false;
         
         [SerializeField] 
-        private UnityEvent<int> _OnHighlightedItemChanged = new();
-        public UnityEvent<int> OnHighlightedItemChanged
+        private UnityEvent<INODataProvider> _OnHighlightedItemChanged = new();
+        public UnityEvent<INODataProvider> OnHighlightedItemChanged
         {
             get => _OnHighlightedItemChanged;
             set => _OnHighlightedItemChanged = value;
@@ -42,7 +42,7 @@ namespace NiqonNO.Core.UI
             }
             HighlightedIndex =  (int)CircularPosition(Mathf.RoundToInt(position));
             HandleCells(true);
-            OnHighlightedItemChanged.Invoke(HighlightedIndex);
+            OnHighlightedItemChanged.Invoke(ItemData.GetGenericDataAt(HighlightedIndex));
         }
         protected override void OnUpdateSelection() 
         {
@@ -115,7 +115,7 @@ namespace NiqonNO.Core.UI
                 if (cell.Index != index)
                 {
                     cell.Index = index;
-                    cell.SeCellData(ItemData.GetDataAt(index));
+                    cell.SeCellData(ItemData.GetGenericDataAt(index));
                 }
                 else if (forceRefresh)
                 {

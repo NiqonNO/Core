@@ -8,7 +8,11 @@ namespace NiqonNO.Core
         [SerializeField] 
         private List<T> ItemData = default;
         List<T> INODataCollection<T>.ItemData => ItemData;
-        
+
         public int Count => ItemData.Count;
+        
+        public T GetDataAt(int index) => ItemData[index];
+
+        public void SelectDataItem(int index) => Raise(GetDataAt(index));
     }
 }

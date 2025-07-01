@@ -1,10 +1,12 @@
 using System;
 using NiqonNO.Core.Utility;
+using NiqonNO.Core.Utility.Attributes;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace NiqonNO.Core.UI
 {
@@ -14,22 +16,41 @@ namespace NiqonNO.Core.UI
         protected readonly AutoScrollState AutoScroll = new AutoScrollState();
         static readonly EasingFunction DefaultEasingFunction = NOEasing.Get(Ease.OutCubic);
         
-        [SerializeField] 
-        private RectTransform _Viewport;
-        public RectTransform Viewport
+        [SerializeField, NORequireInterface(typeof(INODataCollection))]
+        private Object _ItemData;
+        protected INODataCollection ItemData
         {
-            get => _Viewport;
-            set => _Viewport = value;}
+            get => _ItemData as INODataCollection;
+            set => _ItemData = value as Object;
+        }
+        
+        [SerializeField] 
+        bool _IsSubSelector = false;
+        public bool IsSubSelector
+        {
+            get => _IsSubSelector;
+            set => _IsSubSelector = value;
+        }
+        
+        [SerializeField, ShowIf(nameof(IsSubSelector))] 
+        private NOSelector _ParentSelector;
+        public NOSelector ParentSelector
+        {
+            get => _ParentSelector;
+            set => _ParentSelector = value;}
         
         [SerializeField, ChildGameObjectsOnly]
         private NOSelectorCell _CellTemplate;
         public NOSelectorCell CellTemplate {
             get => _CellTemplate;
             set => _CellTemplate = value;}
-
+        
         [SerializeField] 
-        NODataCollectionWrapper _ItemData = default;
-        public NODataCollectionWrapper ItemData => _ItemData;
+        private RectTransform _Viewport;
+        public RectTransform Viewport
+        {
+            get => _Viewport;
+            set => _Viewport = value;}
         
         [SerializeField] 
         ScrollDirection _ScrollDirection = ScrollDirection.Vertical;
@@ -99,8 +120,8 @@ namespace NiqonNO.Core.UI
 
         [Space] 
         [SerializeField] 
-        private UnityEvent<int> _OnItemSelected = new();
-        public UnityEvent<int> OnItemSelected
+        private UnityEvent<INODataProvider> _OnItemSelected = new();
+        public UnityEvent<INODataProvider> OnItemSelected
         {
             get => _OnItemSelected;
             set => _OnItemSelected = value;
@@ -159,8 +180,24 @@ namespace NiqonNO.Core.UI
             Initialize();
         }
 
-        protected override void OnEnable() => CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this);
-        protected override void OnDisable() => CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
+        protected override void OnEnable()
+        {
+            if (IsSubSelector && ParentSelector)
+            {
+                ParentSelector.OnItemSelected.AddListener(SetDataCollection);
+            }
+
+            CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this);
+        }
+        protected override void OnDisable() 
+        {
+            if (IsSubSelector && ParentSelector)
+            {
+                ParentSelector.OnItemSelected.RemoveListener(SetDataCollection);
+            }
+            
+            CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
+        }
 
         public void Rebuild(CanvasUpdate executing) {}
         public void GraphicUpdateComplete() {}
@@ -178,9 +215,12 @@ namespace NiqonNO.Core.UI
             Relayout();
         }
 
-        public void Refresh()
+        private void SetDataCollection(INODataProvider dataProvider)
         {
-            Initialize();
+            if (dataProvider is not INODataCollectionProvider collectionProvider)
+                return;
+            
+            ItemData = collectionProvider.GetDataCollection();
             Relayout();
             JumpTo(0);
         }
@@ -205,8 +245,8 @@ namespace NiqonNO.Core.UI
         {
             SelectedIndex = index;
             OnUpdateSelection();
-            //ItemData.Raise(ItemData.GetDataAt(SelectedIndex));
-            OnItemSelected.Invoke(SelectedIndex);
+            ItemData.SelectDataItem(index);
+            OnItemSelected.Invoke(ItemData.GetGenericDataAt(index));
         }
         
         public virtual void ScrollTo(float position, Action onComplete = null) => ScrollTo(position, Snap.Duration, Snap.Easing, onComplete);

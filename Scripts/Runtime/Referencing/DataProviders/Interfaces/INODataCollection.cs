@@ -6,5 +6,6 @@ namespace NiqonNO.Core
     {
         int Count { get; }
         INODataProvider GetGenericDataAt(int index);
+        void SelectDataItem(int index);
     }
 }

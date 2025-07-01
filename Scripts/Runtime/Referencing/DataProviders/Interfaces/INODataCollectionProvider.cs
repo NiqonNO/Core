@@ -2,6 +2,6 @@
 {
     public interface INODataCollectionProvider
     {
-        public INODataCollection DataCollection { get; }
+        public INODataCollection GetDataCollection();
     }
 }
