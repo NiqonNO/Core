@@ -125,10 +125,10 @@ namespace NiqonNO.Core.UI
                 else
                     cell = CellPool[index];
 
-                cell.SetContext(this);
-                cell.Initialize();
+
+                cell.Initialize(this);
                 cell.Index = index;
-                cell.SetData(ItemData.GetDataAt(index));
+                cell.SeCellData(ItemData.GetDataAt(index));
                 cell.SetVisible(true);
             }
 
@@ -169,8 +169,8 @@ namespace NiqonNO.Core.UI
             if (!forceRefresh) return;
             foreach (var t in CellPool)
             {
-                if (t.IsVisible)
-                    t.OnViewModelChange();
+                if (t.IsVisible())
+                    t.ForceRefresh();
             }
         }
 

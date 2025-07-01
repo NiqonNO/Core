@@ -1,15 +1,15 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 namespace NiqonNO.Core
 {
-    public abstract class NOEventListenerComponent<T1, T2> : NOMonoBehaviour, INOEventListener where T1 : NOEventAsset where T2 : UnityEvent
+    public abstract class NOEventListenerComponent<T1, T2, T3> : NOMonoBehaviour, INOEventListener<T1> where T2 : NOEventAsset<T1> where T3 : UnityEvent<T1>
     {
         [SerializeField]
-        private T1 EventAsset;
+        private T2 EventAsset;
         [SerializeField] 
-        private T2 UnityResponseEvent;
-        
+        private T3 UnityResponseEvent;
+
         private void OnEnable()
         {
             if (EventAsset == null) return;
@@ -22,9 +22,9 @@ namespace NiqonNO.Core
             EventAsset.UnregisterListener(this);
         }
         
-        public void OnEventRaised()
+        public void OnEventRaised(T1 item)
         {
-            UnityResponseEvent?.Invoke();
+            UnityResponseEvent?.Invoke(item);
         }
     }
 }

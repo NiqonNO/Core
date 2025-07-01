@@ -4,7 +4,8 @@ using UnityEngine;
 
 namespace NiqonNO.Core
 {
-    [Serializable] public abstract class NOValueBase<T1, T2>  where T2 : NOValueAsset<T1>
+    [Serializable] 
+    public abstract class NOValueBase<T1, T2>  where T2 : NOValueAsset<T1>
     {
         [SerializeField] 
         protected bool UseReference;

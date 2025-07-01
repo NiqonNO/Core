@@ -2,22 +2,22 @@
 
 namespace NiqonNO.Core
 {
-    public class NOEventListener : INOEventListener
+    public class NOEventListener<T> : INOEventListener<T>
     {
-        private Action Response;
+        private event Action<T> Response;
 
         public NOEventListener() { }
-        public NOEventListener(Action response)
+        public NOEventListener(Action<T> response)
         {
             Response = response;
         }
 
-        public void AddResponse(Action response)
+        public void AddResponse(Action<T> response)
         {
             Response += response;
         }
         
-        public void RemoveResponse(Action response)
+        public void RemoveResponse(Action<T> response)
         {
             Response -= response;
         }
@@ -27,9 +27,9 @@ namespace NiqonNO.Core
             Response = null;
         }
         
-        public void OnEventRaised()
+        public void OnEventRaised(T item)
         {
-            Response?.Invoke();
+            Response?.Invoke(item);
         }
     }
 }

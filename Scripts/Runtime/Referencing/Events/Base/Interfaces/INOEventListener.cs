@@ -6,9 +6,4 @@ namespace NiqonNO.Core
     {
         void OnEventRaised();
     }
-    
-    public interface INOEventListener<T>
-    {
-        void OnEventRaised(T item);
-    }
 }

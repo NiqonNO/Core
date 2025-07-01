@@ -81,9 +81,8 @@ namespace NiqonNO.Core.UI
             for (var i = 0; i < addCount; i++)
             {
                 var cell = Instantiate(CellTemplate, CellContainer);
-
-                cell.SetContext(this);
-                cell.Initialize();
+                
+                cell.Initialize(this);
                 cell.SetVisible(false);
                 CellPool.Add(cell);
             }
@@ -116,14 +115,14 @@ namespace NiqonNO.Core.UI
                 if (cell.Index != index)
                 {
                     cell.Index = index;
-                    cell.SetData(ItemData.GetDataAt(index));
+                    cell.SeCellData(ItemData.GetDataAt(index));
                 }
                 else if (forceRefresh)
                 {
-                    cell.OnViewModelChange();
+                    cell.ForceRefresh();
                 }
 
-                if (!cell.IsVisible)
+                if (!cell.IsVisible())
                 {
                     cell.SetVisible(true);
                 }

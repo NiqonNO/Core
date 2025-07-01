@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace NiqonNO.Core
 {
-    [Serializable] public abstract class NOVariable<T> : NOValueBase<T, NOVariableAsset<T>>, INOVariable<T>
+    [Serializable] 
+    public abstract class NOVariable<T> : NOValueBase<T, NOVariableAsset<T>>, INOVariable<T>
     {
         public T Value
         {
