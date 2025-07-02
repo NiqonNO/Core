@@ -1,6 +1,4 @@
-﻿using System;
-using NiqonNO.Core.MVVM;
-using NiqonNO.Core.Utility.Attributes;
+﻿using NiqonNO.Core.Utility.Attributes;
 using UnityEngine;
 
 namespace NiqonNO.Core.UI
@@ -18,13 +16,5 @@ namespace NiqonNO.Core.UI
         
         [NOMVVMBind] 
         protected string ItemIndex => $"{Index + 1}/{Context.TotalCount}";
-        
-        [NOMVVMBind] 
-        protected bool Selected => Index == Context.SelectedIndex;
-        
-        public override bool IsVisible() => gameObject.activeSelf;
-        public override void SetVisible(bool visible) => gameObject.SetActive(visible);
-
-        public override void ForceRefresh() => OnViewModelChange();
     }
 }

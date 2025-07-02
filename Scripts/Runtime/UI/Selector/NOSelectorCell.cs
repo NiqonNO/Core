@@ -13,11 +13,12 @@ namespace NiqonNO.Core.UI
         
         public abstract void Initialize(NOSelector owner);
 
-        public void SeCellData(INODataProvider data) => Data = data;
+        public virtual void SeCellData(INODataProvider data) => Data = data;
         
-        public abstract bool IsVisible();
-        public abstract void SetVisible(bool visible);
-        public virtual void ForceRefresh() {}
+        public virtual bool IsVisible() => gameObject.activeSelf;
+        public virtual void SetVisible(bool visible) => gameObject.SetActive(visible);
+
+        public abstract void ForceRefresh();
         
         public virtual void UpdatePosition(float position)
         {

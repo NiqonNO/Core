@@ -1,11 +1,16 @@
 ﻿using System;
 using NiqonNO.Core.MVVM;
+using NiqonNO.Core.Utility.Attributes;
 
 namespace NiqonNO.Core.UI
 {
     public abstract class NOSelectorCellViewModel<TData, TContext> : NOSelectorCell, INOMVVMViewModel<TData, TContext> where TData : INODataProvider where TContext : NOSelector
     {
         public Action OnViewModelChangedEvent { get; set; }
+        
+        [NOMVVMBind] 
+        protected bool Selected => Index == Context.SelectedIndex;
+        
         public TData ItemData { get; set; }
         public bool IsModelSet => ItemData != null;
         
@@ -15,12 +20,12 @@ namespace NiqonNO.Core.UI
         protected override INODataProvider Data
         {
             get => ItemData;
-            set => SetData(value);
+            set => SeCellData(value);
         }
         
         public override void Initialize(NOSelector owner) => SetContext(owner as TContext);
         
-        public void SetData(INODataProvider itemData)
+        public override void SeCellData(INODataProvider itemData)
         {
             if (itemData is TData provider)
                 SetData(provider);
@@ -38,6 +43,7 @@ namespace NiqonNO.Core.UI
             OnViewModelChange();
         }
         
+        public override void ForceRefresh() => OnViewModelChange();
         public void OnViewModelChange()
         {
             if (!IsModelSet) return;
