@@ -45,6 +45,12 @@ namespace NiqonNO.Core.UI
             UpdateScrollbar = true;
         }
 
+        protected override void Refresh()
+        {
+            ResizePool();
+            base.Refresh();
+        }
+
         protected override void Relayout()
         {
             base.Relayout();
@@ -106,7 +112,7 @@ namespace NiqonNO.Core.UI
         protected override void Update()
         {
             base.Update();
-            UpdateSliderVisibility();
+            if(Scrollbar) UpdateScrollbarVisibility();
         }
 
         void ResizePool()
@@ -138,7 +144,7 @@ namespace NiqonNO.Core.UI
             }
         }
 
-        void UpdateSliderVisibility()
+        void UpdateScrollbarVisibility()
         {
             bool shouldShowScrollbar = CellContainerSize > ViewportSize;
             if (Scrollbar.gameObject.activeSelf != shouldShowScrollbar)

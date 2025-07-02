@@ -221,12 +221,16 @@ namespace NiqonNO.Core.UI
                 return;
             
             ItemData = collectionProvider.GetDataCollection();
-            Relayout();
-            JumpTo(0);
+            Refresh();
         }
 
         protected virtual void Initialize() {}
 
+        protected virtual void Refresh()
+        {
+            Relayout();
+            JumpTo(0);
+        }
         protected virtual void Relayout()
         {
             ViewportRect = Viewport.rect;
