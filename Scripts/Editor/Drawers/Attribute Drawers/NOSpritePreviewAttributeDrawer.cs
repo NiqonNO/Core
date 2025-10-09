@@ -1,5 +1,4 @@
-﻿using NiqonNO.Core.Utility.Attributes;
-using Sirenix.OdinInspector.Editor;
+﻿using Sirenix.OdinInspector.Editor;
 using UnityEngine;
 
 namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers

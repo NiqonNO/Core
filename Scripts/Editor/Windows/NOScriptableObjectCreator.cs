@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NiqonNO.Core.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 
-namespace NiqonNO.Core.Editor
+namespace NiqonNO.Core.Editor.Windows
 {
     public class NOcriptableObjectCreator : OdinMenuEditorWindow
     {

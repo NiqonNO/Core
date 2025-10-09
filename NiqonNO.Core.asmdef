@@ -1,12 +1,8 @@
 {
-    "name": "NiqonNO.Core.Editor",
-    "rootNamespace": "NiqonNO.Core.Editor",
-    "references": [
-        "GUID:4925df66c94da9345b78305696ea4beb"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "name": "NiqonNO.Core",
+    "rootNamespace": "NiqonNO.Core",
+    "references": [],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

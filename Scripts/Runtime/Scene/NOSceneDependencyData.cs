@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NiqonNO.Core.Utility;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -10,26 +11,30 @@ namespace NiqonNO.Core.Scene
     public class NOSceneDependencyData : ISerializationCallbackReceiver
     {
         private static Dictionary<string, string[]> PersistentSceneDependency { get; set; } = new();
-        
-        [SerializeField, ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false), OnValueChanged(nameof(ValidateChange), true)]
+
+        [SerializeField, ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false),
+         OnValueChanged(nameof(ValidateChange), true)]
         private List<SceneDependencyPair> DependencyTree = new();
 
         public static SortedSet<string> GetSceneDependencies(string scene)
         {
             return GetSceneDependencies(scene, new(new SceneDepthComparer(true)));
         }
-        public static SortedSet<string> GetSceneDependencies(string scene,  SortedSet<string> sceneCollection)
+
+        public static SortedSet<string> GetSceneDependencies(string scene, SortedSet<string> sceneCollection)
         {
-            if (sceneCollection.Contains(scene) || !PersistentSceneDependency.ContainsKey(scene)) return sceneCollection;
+            if (sceneCollection.Contains(scene) || !PersistentSceneDependency.ContainsKey(scene))
+                return sceneCollection;
             sceneCollection.Add(scene);
-            return PersistentSceneDependency[scene].Aggregate(sceneCollection, (current, sceneDependency) => GetSceneDependencies(sceneDependency, current));
+            return PersistentSceneDependency[scene].Aggregate(sceneCollection,
+                (current, sceneDependency) => GetSceneDependencies(sceneDependency, current));
         }
 #if UNITY_EDITOR
         public static void ValidateData()
         {
-            var newDictionary =  Utility.Editor.NOSceneUtility.GetScenesInBuildSettings().ToDictionary(
-                scene => scene, 
-                scene => PersistentSceneDependency.TryGetValue(scene, value: out var value) 
+            var newDictionary =  NOSceneUtility.GetScenesInBuildSettings().ToDictionary(
+                scene => scene,
+                scene => PersistentSceneDependency.TryGetValue(scene, value: out var value)
                     ? value : new string[0]);
             PersistentSceneDependency = newDictionary;
         }
@@ -42,6 +47,7 @@ namespace NiqonNO.Core.Scene
                 PersistentSceneDependency[pair.SceneName] = pair.SceneDependencies.Clone() as string[];
             }
         }
+
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
             PersistentSceneDependency.Clear();
@@ -50,6 +56,7 @@ namespace NiqonNO.Core.Scene
                 PersistentSceneDependency[pair.SceneName] = pair.SceneDependencies.Clone() as string[];
             }
         }
+
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
             DependencyTree.Clear();
@@ -62,8 +69,8 @@ namespace NiqonNO.Core.Scene
         [Serializable]
         private struct SceneDependencyPair
         {
-            [SerializeField, HideLabel, ReadOnly]
-            public string SceneName;
+            [SerializeField, HideLabel, ReadOnly] public string SceneName;
+
             [SerializeField, ValueDropdown(nameof(GetScenes), IsUniqueList = true)]
             public string[] SceneDependencies;
 
@@ -73,19 +80,19 @@ namespace NiqonNO.Core.Scene
                 SceneDependencies = values;
             }
 #if UNITY_EDITOR
-            private IEnumerable<string> GetScenes => Utility.Editor.NOSceneUtility.GetScenesInBuildSettings();
+            private IEnumerable<string> GetScenes => NOSceneUtility.GetScenesInBuildSettings();
 #endif
         }
-        
+
         internal class SceneDepthComparer : IComparer<string>
         {
             private int Direction;
-            
+
             public SceneDepthComparer(bool topFirst)
             {
                 Direction = topFirst ? 1 : -1;
             }
-            
+
             public int Compare(string x, string y)
             {
                 if (x == y)
@@ -110,6 +117,7 @@ namespace NiqonNO.Core.Scene
                     }
                 }
             }
+
             return false;
         }
     }
