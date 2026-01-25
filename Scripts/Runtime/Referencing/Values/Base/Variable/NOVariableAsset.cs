@@ -1,4 +1,5 @@
 using System;
+using Unity.Properties;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -6,6 +7,7 @@ namespace NiqonNO.Core
 {
     public abstract class NOVariableAsset<T> : NOValueAsset<T>, INOVariable<T>
     {
+        [CreateProperty]
         public new T Value
         {
             get => base.Value;
