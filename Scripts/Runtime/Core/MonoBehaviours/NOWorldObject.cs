@@ -1,7 +1,4 @@
-﻿using System;
-using UnityEngine;
-
-namespace NiqonNO.Core
+﻿namespace NiqonNO.Core
 {
     public abstract class NOWorldObject : NOMonoBehaviour
     {

@@ -7,14 +7,8 @@ using UnityEngine.SceneManagement;
 
 namespace NiqonNO.Core.Scene
 {
-    public class NOSceneManager : NOManagerWithStateScriptableObject<NOSceneManagerState>
+    public class NOSceneManager : NOManagerWithStateScriptableObject<NOSceneManager, NOSceneManagerState>
     {
-        public static NOSceneManager SceneManagerInstance
-        {
-            get => RuntimeState.Instance as NOSceneManager;
-            private set => RuntimeState.Instance = value;
-        }
-
         [SerializeField, HideLabel]
         private NOSceneDependencyData SceneDependencyTree;
 
@@ -36,7 +30,6 @@ namespace NiqonNO.Core.Scene
         public override void Initialize()
         {
             base.Initialize();
-            SceneManagerInstance = this;
             SceneManager.sceneLoaded += CheckGameReady;
         }
 

@@ -1,11 +1,10 @@
 using Sirenix.OdinInspector;
-using UnityEngine;
 
 namespace NiqonNO.Core
 {
-    public abstract class NOManagerState : NOScriptableObject
+    public abstract class NOManagerState<T> : NOScriptableObject where T : INOManager
     {
         [ReadOnly, ShowInInspector, PropertyOrder(-1000)]
-        public INOManager Instance;
+        public T Instance;
     }
 }
