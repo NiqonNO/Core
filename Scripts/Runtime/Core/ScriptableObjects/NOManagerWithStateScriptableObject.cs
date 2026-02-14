@@ -7,10 +7,9 @@ namespace NiqonNO.Core
         where T1 : NOManagerScriptableObject 
         where T2 : NOManagerState<T1>
     {
-        [ReadOnly, ShowInInspector, PropertyOrder(-1000)]
+        [ReadOnly, ShowInInspector, PropertyOrder(float.MinValue)]
         protected static T2 RuntimeState { get; private set; }
-        
-        public static T1 Instance  => RuntimeState.Instance;
+        protected static T1 Instance  => RuntimeState.Instance;
 
         public override void Initialize()
         {

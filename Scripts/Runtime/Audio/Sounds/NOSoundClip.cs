@@ -62,8 +62,5 @@ namespace NiqonNO.Core.Audio
 		[SerializeField]
 		private AudioClip[] Clips;
 		public AudioClip GetClip() => Clips.Length == 0 ? null : Clips[Random.Range(0, Clips.Length)];
-
-		public void Play() => NOSoundsManager.Instance.Play(this);
-		public void Stop() => NOSoundsManager.Instance.Stop(this);
 	}
 }

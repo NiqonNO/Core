@@ -5,8 +5,8 @@ namespace NiqonNO.Core
 {
 	public abstract class NOManagerWithSingletonMonoBehaviour<T> : NOManagerMonoBehaviour where T : NOManagerMonoBehaviour
 	{
-		[ReadOnly, ShowInInspector, PropertyOrder(-1000)]
-		public static T Instance { get; private set; }
+		[ReadOnly, ShowInInspector, PropertyOrder(float.MinValue)]
+		protected static T Instance { get; private set; }
 
 		public override void Initialize()
 		{
