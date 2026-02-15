@@ -50,15 +50,11 @@ namespace NiqonNO.Core.Audio
 		
 		[field: SerializeField, BoxGroup("3D Sound Settings"), MinValue(nameof(MinDistance))]
 		public float MaxDistance { get; private set; } = 500;
-		
-		
-		[field: SerializeField, MaxValue(0)]
-		public float FadeInTime { get; private set; }
-		
-		[field: SerializeField, MaxValue(0)]
-		public float FadeOutTime { get; private set; }
-		
-		
+
+		[field: SerializeField] 
+		public int MaxInstances { get; private set; } = 8;
+
+
 		[SerializeField]
 		private AudioClip[] Clips;
 		public AudioClip GetClip() => Clips.Length == 0 ? null : Clips[Random.Range(0, Clips.Length)];

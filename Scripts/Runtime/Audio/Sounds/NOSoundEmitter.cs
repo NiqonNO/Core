@@ -4,18 +4,31 @@ using UnityEngine;
 
 namespace NiqonNO.Core.Audio
 {
+	[RequireComponent(typeof(AudioSource))]
 	public class NOSoundEmitter : NOMonoBehaviour
 	{
 		[SerializeField] 
 		private AudioSource AudioSource;
 
-		private Coroutine WaitingCoroutine;
-		
-		public void Initialize()
+		private Action<NOSoundEmitter> OnClipFinished;
+		private Coroutine FinishRoutine;
+
+		public void Initialize(Action<NOSoundEmitter> onClipFinished)
 		{
+			OnClipFinished = onClipFinished;
 		}
 		
-		public void ConfigureEmitter(NOSoundClip data)
+		public void Play(NOSoundClipState clipState)
+		{
+			clipState.RegisterEmitter(this);
+			ConfigureEmitter(clipState.Data);
+			AudioSource.Play();
+			
+			if(!AudioSource.loop)
+				FinishRoutine = StartCoroutine(WaitForFinish(clipState.UnregisterEmitter));
+		}
+		
+		private void ConfigureEmitter(NOSoundClip data)
 		{
 			var clip = data.GetClip();
 			if (clip == null)
@@ -37,31 +50,24 @@ namespace NiqonNO.Core.Audio
 			AudioSource.minDistance = data.MinDistance;
 			AudioSource.maxDistance = data.MaxDistance;
 		}
-
-		public void Play(Action onFinish)
+		
+		public void StopImmediate()
 		{
-			AudioSource.Play();
-			WaitingCoroutine = StartCoroutine(WaitForEnd(onFinish));
-		}
-
-		public void Stop()
-		{
-			if (WaitingCoroutine != null) 
+			if (FinishRoutine != null)
 			{
-				StopCoroutine(WaitingCoroutine);
-				WaitingCoroutine = null;
+				StopCoroutine(FinishRoutine);
+				FinishRoutine = null;
 			}
-			
+
 			AudioSource.Stop();
-			
+			OnClipFinished?.Invoke(this);
 		}
 		
-		private IEnumerator WaitForEnd(Action onFinish)
+		private IEnumerator WaitForFinish(Action<NOSoundEmitter> onFinished)
 		{
 			yield return new WaitWhile(() => AudioSource.isPlaying);
-			onFinish?.Invoke();
-			
-			
+			onFinished?.Invoke(this);
+			OnClipFinished?.Invoke(this);
 		}
 	}
 }

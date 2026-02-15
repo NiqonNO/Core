@@ -8,8 +8,8 @@ namespace NiqonNO.Core.Audio
     {
         private const int InitialPoolSize = 32;
         
+        private readonly Queue<NOSoundEmitter> EmitterPool = new (InitialPoolSize);
         private readonly Dictionary<NOSoundClip, NOSoundClipState> Clips = new ();
-        private readonly Stack<NOSoundEmitter> Pool = new ();
         
         [SerializeField, SceneObjectsOnly] 
         private NOSoundEmitter EmitterTemplate;
@@ -23,62 +23,61 @@ namespace NiqonNO.Core.Audio
         private void InitializePool()
         {
             for (int i = 0; i < InitialPoolSize; i++)
-                Pool.Push(CreateEmitter());
+                EmitterPool.Enqueue(CreateEmitter());
         }
 
+        public static void PlayClip(NOSoundClip clip) => Instance.Play(clip);
+        private void Play(NOSoundClip clip)
+        {
+            var state = GetOrCreateState(clip);
+
+            if (!state.CanPlay())
+                return;
+
+            var emitter = AcquireEmitter();
+
+            emitter.Play(state);
+        }
+
+        public static void ForceStopClip(NOSoundClip clip) => Instance.StopAllClips(clip);
+        private void StopAllClips(NOSoundClip clip)
+        {
+            if (!Clips.TryGetValue(clip, out var state)) return;
+            state.StopAll();
+        }
+        
+        private NOSoundClipState GetOrCreateState(NOSoundClip clip)
+        {
+            if(!Clips.TryGetValue(clip, out var clipState))
+                clipState = CreateClipState(clip);
+            return clipState;
+        }
+        private NOSoundClipState CreateClipState(NOSoundClip clip)
+        {
+            var clipState = new NOSoundClipState(clip);
+            Clips.Add(clip, clipState);
+            return clipState;
+        }
+        
+        private NOSoundEmitter CreateEmitter()
+        {
+            var emitter = Instantiate(EmitterTemplate, transform);
+            emitter.gameObject.SetActive(false);
+            emitter.Initialize(ReturnEmitter);
+            return emitter;
+        }
         private NOSoundEmitter AcquireEmitter()
         {
-            if(!Pool.TryPop(out var emitter))
+            if(!EmitterPool.TryDequeue(out var emitter))
                 emitter = CreateEmitter();
 
             emitter.gameObject.SetActive(true);
             return emitter;
         }
-
-        private void ReleaseEmitter(NOSoundEmitter emitter)
+        private void ReturnEmitter(NOSoundEmitter emitter)
         {
             emitter.gameObject.SetActive(false);
-            Pool.Push(emitter);
-        }
-
-
-        public static void PlayClip(NOSoundClip clip) => Instance.Play(clip);
-        private void Play(NOSoundClip clip)
-        {
-            if(!Clips.TryGetValue(clip, out var clipState))
-                clipState = CreateClipState(clip);
-            
-            clipState.Play();
-        }
-
-        
-        public static void ForceStopClip(NOSoundClip clip) => Instance.ForceStop(clip);
-        private void ForceStop(NOSoundClip clip)
-        {
-            if (!Clips.TryGetValue(clip, out var clipState)) return;
-            
-            clipState.ForceStop();
-        }
-        public static void ForceStopAllClips(NOSoundClip clip) => Instance.ForceStopAll(clip);
-        private void ForceStopAll(NOSoundClip clip)
-        {
-            if (!Clips.TryGetValue(clip, out var clipState)) return;
-            
-            clipState.ForceStopAll();
-        }
-        
-        private NOSoundClipState CreateClipState(NOSoundClip clip)
-        {
-            var clipState = new NOSoundClipState(clip, AcquireEmitter, ReleaseEmitter);
-            Clips.Add(clip, clipState);
-            return clipState;
-        }
-        private NOSoundEmitter CreateEmitter()
-        {
-            var emitter = Instantiate(EmitterTemplate, transform);
-            emitter.gameObject.SetActive(false);
-            emitter.Initialize();
-            return emitter;
+            EmitterPool.Enqueue(emitter);
         }
         
         public override void Dispose()

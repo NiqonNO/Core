@@ -5,58 +5,42 @@ namespace NiqonNO.Core.Audio
 {
 	public class NOSoundClipState
 	{
-		private readonly NOSoundClip Data;
-		private readonly Func<NOSoundEmitter> Acquire;
-		private readonly Action<NOSoundEmitter> Release;
-		private readonly Queue<NOSoundEmitter> ActiveEmitters = new();
+		public readonly NOSoundClip Data;
+		private readonly HashSet<NOSoundEmitter> ActiveEmitters = new();
 		
 		private int ActiveCount => ActiveEmitters.Count;
 		private bool IsPlaying => ActiveCount > 0;
 		
-		private bool CanPlay()
+		public NOSoundClipState(NOSoundClip data)
+		{
+			Data = data;
+		}
+		
+		public bool CanPlay()
 		{
 			if (Data.Loop && IsPlaying) return false;
+			if (Data.MaxInstances <= ActiveCount) return false;
 			return true;
 		}
 		
-		public NOSoundClipState(NOSoundClip data, 
-			Func<NOSoundEmitter> acquire,
-			Action<NOSoundEmitter> release)
+		public void RegisterEmitter(NOSoundEmitter emitter)
 		{
-			Data = data;
-			Acquire = acquire;
-			Release = release;
-		}
-		
-		public void Play()
-		{
-			if (!CanPlay()) return;
-
-			var emitter = Acquire();
-			if (emitter == null)
-				return;
-			
-			ActiveEmitters.Enqueue(emitter);
-			emitter.ConfigureEmitter(Data);
-			emitter.Play(ForceStop);
+			ActiveEmitters.Add(emitter);
 		}
 
-		public void ForceStop()
+		public void UnregisterEmitter(NOSoundEmitter emitter)
 		{
-			if (!IsPlaying) return;
-			
-			var emitter = ActiveEmitters.Dequeue();
-			emitter.Stop();
-			Release(emitter);
+			ActiveEmitters.Remove(emitter);
 		}
 
-
-		public void ForceStopAll()
+		public void StopAll()
 		{
-			while (IsPlaying)
+			foreach (var emitter in ActiveEmitters)
 			{
-				ForceStop();
+				emitter.StopImmediate();
 			}
+
+			ActiveEmitters.Clear();
 		}
 	}
 }
