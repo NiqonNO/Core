@@ -1,62 +1,61 @@
-using Sirenix.OdinInspector;
-using UnityEngine;
-using UnityEngine.Audio;
+using System;
+using System.Collections.Generic;
 
 namespace NiqonNO.Core.Audio
 {
-	public class NOSoundClip : NOScriptableObject
+	public class NOSoundClip
 	{
-		[field: SerializeField]
-		public AudioMixerGroup MixerGroup { get; private set; }
+		private readonly NOSoundClipData Data;
+		private readonly INOSoundEmitterPool EmitterPool;
+		private readonly List<NOSoundEmitter> ActiveEmitters = new();
+		
+		private int ActiveCount => ActiveEmitters.Count;
+		private bool IsPlaying => ActiveCount > 0;
 
-		[field: SerializeField] 
-		public bool Loop { get; private set; }
+		private bool CanPlay => !Data.Loop || !IsPlaying;
+		private bool MaxPlaying => ActiveCount >= Data.MaxInstances;
+		
+		public NOSoundClip(NOSoundClipData data, INOSoundEmitterPool emitterPool)
+		{
+			Data = data;
+			EmitterPool = emitterPool;
+		}
 
-		[field: SerializeField]
-		public bool Frequent { get; private set; }
-		
-		[field: SerializeField, Range(0,256)]
-		public int Priority { get; private set; } = 128;
-		
-		[SerializeField, MinMaxSlider(0,1, true)]
-		private Vector2 VolumeRange = Vector2.one;
-		public float Volume => Random.Range(VolumeRange.x, VolumeRange.y);
-		
-		[SerializeField, MinMaxSlider(-3,3, true)]
-		private Vector2 PitchRange = Vector2.one;
-		public float Pitch => Random.Range(PitchRange.x, PitchRange.y);
-		
-		[field: SerializeField, Range(-1,1)]
-		public float StereoPan { get; private set; } = 0;
-		
-		[field: SerializeField, Range(0,1)]
-		public float SpatialBlend { get; private set; } = 0;
-		
-		[field: SerializeField, Range(0,1.1f)]
-		public float ReverbZoneMix { get; private set; } = 1;
-		
-		
-		[field: SerializeField, BoxGroup("3D Sound Settings"), Range(0, 5)]
-		public float DopplerLevel { get; private set; } = 1;
-		
-		[field: SerializeField, BoxGroup("3D Sound Settings"), Range(0, 360)]
-		public float Spread { get; private set; } = 0;
-		
-		[field: SerializeField, BoxGroup("3D Sound Settings")] 
-		public AudioRolloffMode VolumeRolloff { get; private set; }
-		
-		[field: SerializeField, BoxGroup("3D Sound Settings"), MaxValue(nameof(MaxDistance))]
-		public float MinDistance { get; private set; } = 1;
-		
-		[field: SerializeField, BoxGroup("3D Sound Settings"), MinValue(nameof(MinDistance))]
-		public float MaxDistance { get; private set; } = 500;
+		public void Play()
+		{
+			if (!CanPlay) return;
+			var emitter = AllocateEmitter();
+			
+			emitter.Play();
+		}
 
-		[field: SerializeField] 
-		public int MaxInstances { get; private set; } = 8;
+		NOSoundEmitter AllocateEmitter()
+		{
+			var emitter = MaxPlaying ? StealEmitter() : EmitterPool.Acquire();
+			ActiveEmitters.Add(emitter);
+			emitter.ConfigureEmitter(Data, ReturnEmitter);
+			return emitter;
+			
+			NOSoundEmitter StealEmitter()
+			{
+				var reusedEmitter = ActiveEmitters[0];
+				ActiveEmitters.RemoveAt(0);
+				return reusedEmitter;
+			}
+		}
 
+		void ReturnEmitter(NOSoundEmitter emitter)
+		{
+			ActiveEmitters.Remove(emitter);
+			EmitterPool.Release(emitter);
+		}
 
-		[SerializeField]
-		private AudioClip[] Clips;
-		public AudioClip GetClip() => Clips.Length == 0 ? null : Clips[Random.Range(0, Clips.Length)];
+		public void StopAll()
+		{
+			foreach (var emitter in ActiveEmitters)
+			{
+				emitter.ForceStop();
+			}
+		}
 	}
 }

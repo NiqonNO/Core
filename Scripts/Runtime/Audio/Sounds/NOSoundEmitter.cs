@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using UnityEngine;
 
 namespace NiqonNO.Core.Audio
@@ -7,28 +6,29 @@ namespace NiqonNO.Core.Audio
 	[RequireComponent(typeof(AudioSource))]
 	public class NOSoundEmitter : NOMonoBehaviour
 	{
+		private Action<NOSoundEmitter> OnFinished;
+		private bool Configured;
+		
 		[SerializeField] 
 		private AudioSource AudioSource;
+		
+		public bool IsPlaying => AudioSource.isPlaying;
 
-		private Action<NOSoundEmitter> OnClipFinished;
-		private Coroutine FinishRoutine;
-
-		public void Initialize(Action<NOSoundEmitter> onClipFinished)
+		public void Initialize()
 		{
-			OnClipFinished = onClipFinished;
+			AudioSource??=GetComponent<AudioSource>();
+			AudioSource.playOnAwake = false;
+			gameObject.SetActive(false);
 		}
 		
-		public void Play(NOSoundClipState clipState)
+		public void Play()
 		{
-			clipState.RegisterEmitter(this);
-			ConfigureEmitter(clipState.Data);
+			if (Configured == false) return;
+			gameObject.SetActive(true);
 			AudioSource.Play();
-			
-			if(!AudioSource.loop)
-				FinishRoutine = StartCoroutine(WaitForFinish(clipState.UnregisterEmitter));
 		}
 		
-		private void ConfigureEmitter(NOSoundClip data)
+		public void ConfigureEmitter(NOSoundClipData data, Action<NOSoundEmitter> onClipPlayed)
 		{
 			var clip = data.GetClip();
 			if (clip == null)
@@ -36,6 +36,7 @@ namespace NiqonNO.Core.Audio
 
 			AudioSource.clip = clip;
 			AudioSource.loop = data.Loop;
+			AudioSource.priority = data.Priority;
 			AudioSource.outputAudioMixerGroup = data.MixerGroup;
 
 			AudioSource.volume = data.Volume;
@@ -49,25 +50,23 @@ namespace NiqonNO.Core.Audio
 			AudioSource.rolloffMode = data.VolumeRolloff;
 			AudioSource.minDistance = data.MinDistance;
 			AudioSource.maxDistance = data.MaxDistance;
-		}
-		
-		public void StopImmediate()
-		{
-			if (FinishRoutine != null)
-			{
-				StopCoroutine(FinishRoutine);
-				FinishRoutine = null;
-			}
 
-			AudioSource.Stop();
-			OnClipFinished?.Invoke(this);
+			OnFinished = onClipPlayed;
+
+			Configured = true;
 		}
-		
-		private IEnumerator WaitForFinish(Action<NOSoundEmitter> onFinished)
+
+		public void Stop()
 		{
-			yield return new WaitWhile(() => AudioSource.isPlaying);
-			onFinished?.Invoke(this);
-			OnClipFinished?.Invoke(this);
+			OnFinished?.Invoke(this);
+			OnFinished = null;
+			Configured = false;
+			gameObject.SetActive(false);
+		}
+
+		public void ForceStop()
+		{
+			AudioSource.Stop();
 		}
 	}
 }
