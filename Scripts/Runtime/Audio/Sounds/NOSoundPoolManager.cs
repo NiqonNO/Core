@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -14,43 +14,30 @@ namespace NiqonNO.Core.Audio
         [SerializeField, SceneObjectsOnly] 
         private NOSoundEmitter EmitterTemplate;
         
-        private Predicate<NOSoundEmitter> RemoveStoppedPredicate;
-        
         public override void Initialize()
         {
             NOAudioManager.RegisterSoundPool(this);
-            RemoveStoppedPredicate = RemoveStopped;
             InitializePool();
-            enabled = false;
         }
 
         public override void Dispose()
         {
-            foreach (var emitter in ActiveEmitters)
+            while (ActiveEmitters.Count > 0)
             {
+                var emitter = ActiveEmitters.First();
                 emitter.ForceStop();
+                Return(emitter);
             }
-            ActiveEmitters.RemoveWhere(RemoveStoppedPredicate);
+
             NOAudioManager.RegisterSoundPool(null);
-        }
-
-        private void Update()
-        {
-            ActiveEmitters.RemoveWhere(RemoveStoppedPredicate);
-        }            
-        private bool RemoveStopped(NOSoundEmitter emitter)
-        {
-            if (emitter.IsPlaying)
-                return false;
-
-            emitter.Stop();
-            return true;
         }
 
         private void InitializePool()
         {
-            for (int i = 0; i < InitialPoolSize; i++)
+            for (int i = 1; i < InitialPoolSize; i++)
                 EmitterPool.Enqueue(CreateEmitter());
+            EmitterTemplate.Initialize();
+            EmitterPool.Enqueue(EmitterTemplate);
         }
         
         private NOSoundEmitter CreateEmitter()
@@ -66,16 +53,12 @@ namespace NiqonNO.Core.Audio
                 emitter = CreateEmitter();
 
             ActiveEmitters.Add(emitter);
-            enabled = true;
             return emitter;
         }
-        public void Release(NOSoundEmitter emitter)
+        public void Return(NOSoundEmitter emitter)
         {
-            ActiveEmitters.Remove(emitter);
-            EmitterPool.Enqueue(emitter);
-            
-            if(ActiveEmitters.Count == 0)
-                enabled = false;
+            if(ActiveEmitters.Remove(emitter))
+                EmitterPool.Enqueue(emitter);
         }
     }
 }

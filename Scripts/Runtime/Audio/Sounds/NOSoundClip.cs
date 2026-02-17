@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NiqonNO.Core.Audio
 {
@@ -47,14 +48,14 @@ namespace NiqonNO.Core.Audio
 		void ReturnEmitter(NOSoundEmitter emitter)
 		{
 			ActiveEmitters.Remove(emitter);
-			EmitterPool.Release(emitter);
+			EmitterPool.Return(emitter);
 		}
 
 		public void StopAll()
 		{
-			foreach (var emitter in ActiveEmitters)
+			while (ActiveEmitters.Count > 0)
 			{
-				emitter.ForceStop();
+				ActiveEmitters.First().ForceStop();
 			}
 		}
 	}

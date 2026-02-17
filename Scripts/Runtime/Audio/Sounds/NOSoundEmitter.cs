@@ -11,8 +11,6 @@ namespace NiqonNO.Core.Audio
 		
 		[SerializeField] 
 		private AudioSource AudioSource;
-		
-		public bool IsPlaying => AudioSource.isPlaying;
 
 		public void Initialize()
 		{
@@ -56,7 +54,15 @@ namespace NiqonNO.Core.Audio
 			Configured = true;
 		}
 
-		public void Stop()
+		private void Update()
+		{
+			if (AudioSource.loop) return;
+			if (AudioSource.isPlaying) return;
+
+			Stop();
+		}
+
+		private void Stop()
 		{
 			OnFinished?.Invoke(this);
 			OnFinished = null;
@@ -67,6 +73,7 @@ namespace NiqonNO.Core.Audio
 		public void ForceStop()
 		{
 			AudioSource.Stop();
+			Stop();
 		}
 	}
 }
