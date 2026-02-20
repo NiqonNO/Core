@@ -79,9 +79,7 @@ namespace NiqonNO.Core.Scene
                 SceneName = key;
                 SceneDependencies = values;
             }
-#if UNITY_EDITOR
             private IEnumerable<string> GetScenes => NOSceneUtility.GetScenesInBuildSettings();
-#endif
         }
 
         internal class SceneDepthComparer : IComparer<string>
