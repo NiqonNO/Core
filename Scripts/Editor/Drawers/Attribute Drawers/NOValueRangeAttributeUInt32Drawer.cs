@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers
 {
-    public class NOValueRangeAttributeUInt32Drawer<T1, T2> : OdinAttributeDrawer<NOValueRangeAttribute, T1> where T1 : NOValueBase<uint, T2> where T2 : NOValueAsset<uint>
+    public class NOValueRangeAttributeUInt32Drawer<T1> : OdinAttributeDrawer<NOValueRangeAttribute, T1> where T1 : NOValue<uint>
     {
         InspectorProperty UseReferenceProperty;
         InspectorProperty LocalValueProperty;
