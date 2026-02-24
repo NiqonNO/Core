@@ -1,16 +1,23 @@
-using System;
+using Sirenix.OdinInspector;
 using Unity.Properties;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace NiqonNO.Core
 {
-    public abstract class NOVariableAsset<T> : NOValueAsset<T>, INOVariable<T>
+    public abstract class NOReference<T> : NOScriptableObject, INOValue<T>
     {
+        [SerializeField, HideLabel, InlineProperty, DisableInInlineEditors] 
+        protected T LocalValue;
+        [SerializeField] 
+        private CallbackType CallbackType;
+        [SerializeField] 
+        private UnityEvent<T> OnValueChange;
+        
         [CreateProperty]
-        public new T Value
+        public virtual T Value
         {
-            get => base.Value;
+            get => LocalValue;
             set
             {
                 switch (CallbackType)
@@ -28,15 +35,9 @@ namespace NiqonNO.Core
                     default:
                         LocalValue = value;
                         break;
-   
                 }
             }
         }
-        
-        [SerializeField] 
-        private CallbackType CallbackType;
-        [SerializeField] 
-        private UnityEvent<T> OnValueChange;
 
         protected virtual void OnValueUpdated()
         {

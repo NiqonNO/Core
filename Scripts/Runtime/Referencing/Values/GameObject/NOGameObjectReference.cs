@@ -4,7 +4,7 @@ using UnityEngine;
 namespace NiqonNO.Core
 {
     [Serializable]
-    public class NOGameObjectVariableAsset : NOVariableAsset<GameObject>
+    public class NOGameObjectReference : NOReference<GameObject>
     {
         
     }

@@ -5,7 +5,7 @@ using UnityEngine.Events;
 namespace NiqonNO.Core
 {
     [Serializable]
-    public class NOColorVariableAsset : NOVariableAsset<Color>
+    public class NOColorReference : NOReference<Color>
     {
         [SerializeField] 
         private UnityEvent<float> OnValueChangeR;

@@ -3,7 +3,7 @@ using System;
 namespace NiqonNO.Core
 {
     [Serializable]
-    public class NOIntVariableAsset : NOVariableAsset<int>
+    public class NOBoolReference : NOReference<bool>
     {
         
     }

@@ -5,7 +5,7 @@ using UnityEngine.Events;
 namespace NiqonNO.Core
 {
     [Serializable]
-    public class NOVector2VariableAsset : NOVariableAsset<Vector2>
+    public class NOVector2Reference : NOReference<Vector2>
     {
         [SerializeField] 
         private UnityEvent<float> OnValueChangeX;
