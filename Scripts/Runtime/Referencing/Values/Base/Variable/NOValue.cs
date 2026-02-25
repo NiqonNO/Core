@@ -6,7 +6,7 @@ using UnityEngine;
 namespace NiqonNO.Core
 {
     [Serializable] 
-    public abstract class NOValue<T> : INOValue<T>
+    public class NOValue<T> : INOValue<T>
     {
         [SerializeField] 
         protected bool UseReference;

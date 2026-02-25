@@ -3,12 +3,12 @@ using UnityEngine.Events;
 
 namespace NiqonNO.Core
 {
-    public abstract class NOEventListenerComponent<T1, T2> : NOMonoBehaviour, INOEventListener where T1 : NOEventAsset where T2 : UnityEvent
+    public class NOEventListenerComponent : NOMonoBehaviour, INOEventListener
     {
         [SerializeField]
-        private T1 EventAsset;
+        private NOEventAsset EventAsset;
         [SerializeField] 
-        private T2 UnityResponseEvent;
+        private UnityEvent UnityResponseEvent;
         
         private void OnEnable()
         {

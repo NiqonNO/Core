@@ -3,9 +3,9 @@ using Sirenix.OdinInspector;
 
 namespace NiqonNO.Core
 {
-    public abstract class NOEventAsset : NOScriptableObject
+    public class NOEventAsset : NOScriptableObject
     {
-        private readonly List<INOEventListener> EventListeners = new();
+        private readonly HashSet<INOEventListener> EventListeners = new();
 
         [Button]
         public void Raise()
@@ -18,12 +18,10 @@ namespace NiqonNO.Core
 
         public void RegisterListener(INOEventListener listener)
         {
-            if (EventListeners.Contains(listener)) return;
             EventListeners.Add(listener);
         }
         public void UnregisterListener(INOEventListener listener)
         {
-            if (!EventListeners.Contains(listener)) return;
             EventListeners.Remove(listener);
         }
     }

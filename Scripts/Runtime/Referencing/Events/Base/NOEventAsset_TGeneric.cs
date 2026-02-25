@@ -5,7 +5,7 @@ namespace NiqonNO.Core
 {
     public abstract class NOEventAsset<T> : NOScriptableObject
     {
-        private readonly List<INOEventListener<T>> EventListeners = new();
+        private readonly HashSet<INOEventListener<T>> EventListeners = new();
 
         [Button]
         public void Raise(T item)
@@ -18,12 +18,10 @@ namespace NiqonNO.Core
 
         public void RegisterListener(INOEventListener<T> listener)
         {
-            if (EventListeners.Contains(listener)) return;
             EventListeners.Add(listener);
         }
         public void UnregisterListener(INOEventListener<T> listener)
         {
-            if (!EventListeners.Contains(listener)) return;
             EventListeners.Remove(listener);
         }
     }
