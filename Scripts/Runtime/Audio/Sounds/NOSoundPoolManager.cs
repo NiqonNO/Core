@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace NiqonNO.Core.Audio
 {
-    public class NOSoundPoolManager : NOManagerMonoBehaviour, INOSoundEmitterPool
+    public class NOSoundPoolManager : NOManagerMonoBehaviour, INOSoundEmitterPoolService
     {
         private const int InitialPoolSize = 32;
         private readonly Queue<NOSoundEmitter> EmitterPool = new (InitialPoolSize);

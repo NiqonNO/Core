@@ -7,7 +7,7 @@ namespace NiqonNO.Core.Audio
 	public class NOSoundClip : NODataState<NOSoundClipData>
 	{
 		[NOInject]
-		private INOSoundEmitterPool EmitterPool;
+		private INOSoundEmitterPoolService EmitterPool;
 		
 		private readonly List<NOSoundEmitter> ActiveEmitters = new();
 		
