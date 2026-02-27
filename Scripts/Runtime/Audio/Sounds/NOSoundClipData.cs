@@ -4,7 +4,7 @@ using UnityEngine.Audio;
 
 namespace NiqonNO.Core.Audio
 {
-	public class NOSoundClipData : NOScriptableObject
+	public class NOSoundClipData : NOData
 	{
 		[field: SerializeField]
 		public AudioMixerGroup MixerGroup { get; private set; }

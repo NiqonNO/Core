@@ -16,7 +16,6 @@ namespace NiqonNO.Core.Audio
         
         public override void Initialize()
         {
-            NOAudioManager.RegisterSoundPool(this);
             InitializePool();
         }
 
@@ -28,8 +27,6 @@ namespace NiqonNO.Core.Audio
                 emitter.ForceStop();
                 Return(emitter);
             }
-
-            NOAudioManager.RegisterSoundPool(null);
         }
 
         private void InitializePool()

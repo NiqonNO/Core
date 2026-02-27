@@ -6,10 +6,10 @@ namespace NiqonNO.Core
     public class NOProjectContext : NOScriptableObject
     {
         private const string ResourcesCorePath = "Core";
-        public static NOProjectContext ProjectContext { get; private set; }
+        private static NOProjectContext ProjectContext { get; set; }
 
         [field: SerializeField]
-        public NOManagerScriptableObject[] ScriptableObjectManagers { get; private set; }
+        public NOManagerSO[] ScriptableObjectManagers { get; private set; }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Initialize()
@@ -24,7 +24,7 @@ namespace NiqonNO.Core
             {
                 Debug.LogWarning($"More than one objects of type {nameof(NOProjectContext)} have been found in Resources \"{ResourcesCorePath}\" folder. First result will be used.");
             }
-            
+
             ProjectContext = projectContexts[0];
             ProjectContext.SetupProjectContext();
         }
@@ -32,19 +32,59 @@ namespace NiqonNO.Core
         private void SetupProjectContext()
         {
             Application.quitting += DisposeProjectContext;
+
             if (!ScriptableObjectManagers.IsNullOrEmpty())
             {
-                ScriptableObjectManagers.ForEach(m => m.Initialize());
+                RegisterServices();
+                InitializeServices();
             }
         }
+
         private void DisposeProjectContext()
         {
             Application.quitting -= DisposeProjectContext;
+
             if (!ScriptableObjectManagers.IsNullOrEmpty())
             {
-                ScriptableObjectManagers.ForEach(m => m.Dispose());
+                DisposeServices();
             }
+
             ProjectContext = null;
+        }
+        
+        private void RegisterServices()
+        {
+            foreach (var manager in ScriptableObjectManagers)
+            {
+                if (CheckNull(manager)) continue;
+                NOContainer.RegisterService(manager);
+            }
+        }
+
+        private void InitializeServices()
+        {
+            foreach (var manager in ScriptableObjectManagers)
+            {
+                if (CheckNull(manager)) continue;
+                manager.Initialize();
+            }
+        }
+        
+        private void DisposeServices()
+        {
+            foreach (var manager in ScriptableObjectManagers)
+            {
+                if (CheckNull(manager)) continue;
+                NOContainer.UnregisterService(manager);
+                manager.Dispose();
+            }
+        }
+        
+        bool CheckNull(INOManager manager)
+        {
+            if (manager != null) return false;
+            Debug.LogWarning($"Null manager in ScriptableObjectManagers array in Project context", this);
+            return true;
         }
     }
 }

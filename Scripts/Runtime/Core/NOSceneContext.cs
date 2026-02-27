@@ -5,33 +5,89 @@ namespace NiqonNO.Core
 {
     public class NOSceneContext : NOMonoBehaviour
     {
-        [field: SerializeField]
-        public NOManagerMonoBehaviour[] MonoBehaviourManagers { get; private set; }
-        [field: SerializeField]
-        public NOManagerScriptableObject[] ScriptableObjectManagers { get; private set; }
+        [field: SerializeField] public NOManagerMonoBehaviour[] MonoBehaviourManagers { get; private set; }
+        [field: SerializeField] public NOManagerSO[] ScriptableObjectManagers { get; private set; }
 
         public void SetupSceneContext()
         {
             if (!ScriptableObjectManagers.IsNullOrEmpty())
-            {
-                ScriptableObjectManagers.ForEach(m => m.Initialize());
-            }
+                RegisterSO();
             if (!MonoBehaviourManagers.IsNullOrEmpty())
-            {
-                MonoBehaviourManagers.ForEach(m => m.Initialize());
-            }
+                RegisterMono();
+
+            if (!ScriptableObjectManagers.IsNullOrEmpty())
+                InitializeSO();
+            if (!MonoBehaviourManagers.IsNullOrEmpty())
+                InitializeMono();
         }
 
         public void DisposeSceneContext()
         {
             if (!MonoBehaviourManagers.IsNullOrEmpty())
-            {
-                MonoBehaviourManagers.ForEach(m => m.Dispose());
-            }
+                DisposeMono();
             if (!ScriptableObjectManagers.IsNullOrEmpty())
+                DisposeSO();
+        }
+        
+        private void RegisterSO()
+        {
+            foreach (var manager in ScriptableObjectManagers)
             {
-                ScriptableObjectManagers.ForEach(m => m.Dispose());
+                if (CheckNull(manager)) continue;
+                NOContainer.RegisterService(manager);
             }
+        }
+        private void RegisterMono()
+        {
+            foreach (var manager in MonoBehaviourManagers)
+            {
+                if (CheckNull(manager)) continue;
+                NOContainer.RegisterService(manager);
+            }
+        }
+        
+        private void InitializeSO()
+        {
+            foreach (var manager in ScriptableObjectManagers)
+            {
+                if (CheckNull(manager)) continue;
+                manager.Initialize();
+            }
+        }
+        private void InitializeMono()
+        {
+            foreach (var manager in MonoBehaviourManagers)
+            {
+                if (CheckNull(manager)) continue;
+                manager.Initialize();
+            }
+        }
+        
+        private void DisposeSO()
+        {
+            foreach (var manager in ScriptableObjectManagers)
+            {
+                if (CheckNull(manager)) continue;
+                NOContainer.UnregisterService(manager);
+                manager.Dispose();
+            }
+        }
+
+        private void DisposeMono()
+        {
+            foreach (var manager in MonoBehaviourManagers)
+            {
+                if (CheckNull(manager)) continue;
+                NOContainer.UnregisterService(manager);
+                manager.Dispose();
+            }
+        }
+
+        bool CheckNull(INOManager manager)
+        {
+            if (manager != null) return false;
+            Debug.LogWarning($"Null manager in ScriptableObjectManagers array in Project context", this);
+            return true;
         }
     }
 }

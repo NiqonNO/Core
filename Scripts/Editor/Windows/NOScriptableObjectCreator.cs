@@ -17,7 +17,7 @@ namespace NiqonNO.Core.Editor.Windows
             .Where(t =>
                 t.IsClass &&
                 typeof(NOScriptableObject).IsAssignableFrom(t) &&
-                !typeof(NOManagerState<>).IsAssignableFrom(t) &&
+                !typeof(NOManagerState).IsAssignableFrom(t) &&
                 !typeof(EditorWindow).IsAssignableFrom(t) &&
                 !typeof(UnityEditor.Editor).IsAssignableFrom(t))
            .ToHashSet();

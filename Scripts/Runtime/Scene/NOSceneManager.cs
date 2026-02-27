@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace NiqonNO.Core.Scene
 {
-    public class NOSceneManager : NOManagerWithStateScriptableObject<NOSceneManager, NOSceneManagerState>
+    public class NOSceneManager : NOManagerWithStateSO<NOSceneManagerState>
     {
         [SerializeField, HideLabel]
         private NOSceneDependencyData SceneDependencyTree;

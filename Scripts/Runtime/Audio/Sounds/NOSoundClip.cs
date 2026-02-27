@@ -4,23 +4,18 @@ using System.Linq;
 
 namespace NiqonNO.Core.Audio
 {
-	public class NOSoundClip
+	public class NOSoundClip : NODataState<NOSoundClipData>
 	{
-		private readonly NOSoundClipData Data;
-		private readonly INOSoundEmitterPool EmitterPool;
+		[NOInject]
+		private INOSoundEmitterPool EmitterPool;
+		
 		private readonly List<NOSoundEmitter> ActiveEmitters = new();
 		
 		private int ActiveCount => ActiveEmitters.Count;
 		private bool IsPlaying => ActiveCount > 0;
 
-		private bool CanPlay => !Data.Loop || !IsPlaying;
-		private bool MaxPlaying => ActiveCount >= Data.MaxInstances;
-		
-		public NOSoundClip(NOSoundClipData data, INOSoundEmitterPool emitterPool)
-		{
-			Data = data;
-			EmitterPool = emitterPool;
-		}
+		private bool CanPlay => !Asset.Loop || !IsPlaying;
+		private bool MaxPlaying => ActiveCount >= Asset.MaxInstances;
 
 		public void Play()
 		{
@@ -34,7 +29,7 @@ namespace NiqonNO.Core.Audio
 		{
 			var emitter = MaxPlaying ? StealEmitter() : EmitterPool.Acquire();
 			ActiveEmitters.Add(emitter);
-			emitter.ConfigureEmitter(Data, ReturnEmitter);
+			emitter.ConfigureEmitter(Asset, ReturnEmitter);
 			return emitter;
 			
 			NOSoundEmitter StealEmitter()
