@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace NiqonNO.Core
 {
 	public abstract class NOAssetManagerSO<TData, TDataState, TRuntimeState> :  NOManagerWithStateSO<TRuntimeState>
@@ -11,17 +9,7 @@ namespace NiqonNO.Core
 		public virtual TDataState GetState(TData data)
 		{
 			if (RuntimeState.States.TryGetValue(data, out var clipState)) return clipState;
-			
-			clipState = CreateAsset<TDataState>();
-			clipState.Initialize(data);
-			RuntimeState.States.Add(data, clipState);
-			return clipState;
-		}
-		
-		public override void Initialize()
-		{
-			base.Initialize();
-			
+			return CreateDataState(data);
 		}
         
 		public override void Dispose()
@@ -33,6 +21,14 @@ namespace NiqonNO.Core
 
 			RuntimeState.States.Clear();
 			base.Dispose();
+		}
+
+		protected TDataState CreateDataState(TData data)
+		{
+			TDataState clipState = CreateAsset<TDataState>();
+			clipState.Initialize(data);
+			RuntimeState.States.Add(data, clipState);
+			return clipState;
 		}
 	}
 }
