@@ -102,6 +102,8 @@ namespace NiqonNO.Core.Scene
                 }
 
                 contextFound = true;
+                if (context.MainScene)
+                    SceneManager.SetActiveScene(scene);
                 context.SetupSceneContext();
                 LoadedScenes.Add(scene.name, context);
             }

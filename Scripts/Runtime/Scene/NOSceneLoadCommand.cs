@@ -60,7 +60,9 @@ namespace NiqonNO.Core.Scene
                     SortedScenesToLoad.Remove(scene);
                     return;
                 }
+                var previous = SceneManager.GetActiveScene();
                 await Awaitable.FromAsyncOperation(SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive));
+                SceneManager.SetActiveScene(previous);
                 OnSceneLoaded?.Invoke(SceneManager.GetSceneByName(scene));
                 SortedScenesToLoad.Remove(scene);
             }

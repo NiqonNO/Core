@@ -5,8 +5,13 @@ namespace NiqonNO.Core
 {
     public class NOSceneContext : NOMonoBehaviour
     {
-        [field: SerializeField] public NOManagerMonoBehaviour[] MonoBehaviourManagers { get; private set; }
-        [field: SerializeField] public NOManagerSO[] ScriptableObjectManagers { get; private set; }
+        [field: SerializeField] 
+        public bool MainScene { get; private set; }
+        
+        [field: SerializeField] 
+        public NOManagerMonoBehaviour[] MonoBehaviourManagers { get; private set; }
+        [field: SerializeField] 
+        public NOManagerSO[] ScriptableObjectManagers { get; private set; }
 
         public void SetupSceneContext()
         {
