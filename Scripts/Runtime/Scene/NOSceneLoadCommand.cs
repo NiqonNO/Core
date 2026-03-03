@@ -1,96 +1,117 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace NiqonNO.Core.Scene
 {
-    public class NOSceneLoadCommand : IDisposable
+    public class NOSceneLoadCommand
     {
-        private SortedSet<string> SortedScenesToLoad = new(new NOSceneDependencyData.SceneDepthComparer(true));
-        private SortedSet<string> SortedScenesToUnload = new(new NOSceneDependencyData.SceneDepthComparer(false));
-        
+        private List<string> SortedScenesToLoad;
+        private List<string> SortedScenesToUnload;
+
         private readonly Action OnLoadingFinished;
-        private CancellationTokenSource LoadSceneCommandCancellationToken;
-        
+        private AsyncOperation SceneLoadingOperation;
+
         public NOSceneLoadCommand(string sceneToLoad, string sceneToUnload, Action onLoadingFinished)
         {
-            SortedScenesToLoad = NOSceneDependencyData.GetSceneDependencies(sceneToLoad, SortedScenesToLoad);
-            SortedScenesToUnload = NOSceneDependencyData.GetSceneDependencies(sceneToUnload, SortedScenesToUnload);
+            SortedScenesToLoad = NOSceneDependencyData.GetSceneDependencies(sceneToLoad, false);
+            SortedScenesToUnload = NOSceneDependencyData.GetSceneDependencies(sceneToUnload, true);
             OnLoadingFinished = onLoadingFinished;
         }
 
         public event Action<UnityEngine.SceneManagement.Scene> OnSceneLoaded;
         public event Action<UnityEngine.SceneManagement.Scene> OnBeforeSceneUnloaded;
 
-        public void AddSceneToLoad(string sceneToLoad) => SortedScenesToLoad = NOSceneDependencyData.GetSceneDependencies(sceneToLoad, SortedScenesToLoad);
-        public void AddSceneToUnload(string sceneToUnload) => SortedScenesToUnload = NOSceneDependencyData.GetSceneDependencies(sceneToUnload, SortedScenesToUnload);
+        public void AddSceneToLoad(string sceneToLoad) => SortedScenesToLoad =
+            NOSceneDependencyData.GetSceneDependencies(sceneToLoad, SortedScenesToLoad, false);
+
+        public void AddSceneToUnload(string sceneToUnload) => SortedScenesToUnload =
+            NOSceneDependencyData.GetSceneDependencies(sceneToUnload, SortedScenesToUnload, true);
+
         public void Run()
         {
             LoadSceneCommand();
         }
+
         public void Complete()
         {
-            LoadSceneCommandCancellationToken?.Dispose();
-            LoadSceneCommandCancellationToken = null;
         }
-        public void Cancel()
-        {
-            LoadSceneCommandCancellationToken?.Cancel();
-        }
-        void IDisposable.Dispose() => Cancel();
 
-        private async void LoadSceneCommand()
+        public void Cancel() => Complete();
+
+        private void LoadSceneCommand()
         {
-            LoadSceneCommandCancellationToken = new CancellationTokenSource();
-            while (SortedScenesToLoad.Count + SortedScenesToUnload.Count > 0)
+            if (SortedScenesToUnload.Count > 0)
             {
-                if (SortedScenesToUnload.Any()) await UnloadScene(SortedScenesToUnload.First());
-                else if (SortedScenesToLoad.Any()) await LoadScene(SortedScenesToLoad.First());
+                UnloadScene(SortedScenesToUnload[0]);
+                return;
             }
-            OnLoadingFinished.Invoke();
-            return;
-            
-            async Awaitable LoadScene(string scene)
+
+            if (SortedScenesToLoad.Count > 0)
             {
-                if (SceneManager.GetSceneByName(scene).isLoaded)
-                {
-                    SortedScenesToLoad.Remove(scene);
-                    return;
-                }
-                var previous = SceneManager.GetActiveScene();
-                await Awaitable.FromAsyncOperation(SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive));
-                SceneManager.SetActiveScene(previous);
+                LoadScene(SortedScenesToLoad[0]);
+                return;
+            }
+
+            OnLoadingFinished.Invoke();
+        }
+
+        void LoadScene(string scene)
+        {
+            if (SceneManager.GetSceneByName(scene).isLoaded)
+            {
+                SortedScenesToLoad.Remove(scene);
+                OnSceneLoaded?.Invoke(SceneManager.GetSceneByName(scene));
+                LoadSceneCommand();
+                return;
+            }
+
+            SceneLoadingOperation = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
+            SceneLoadingOperation.completed += Completed;
+
+            void Completed(AsyncOperation op)
+            {
                 OnSceneLoaded?.Invoke(SceneManager.GetSceneByName(scene));
                 SortedScenesToLoad.Remove(scene);
+                LoadSceneCommand();
             }
-            async Awaitable UnloadScene(string scene)
+        }
+        void UnloadScene(string scene)
+        {
+            if (!SceneManager.GetSceneByName(scene).isLoaded)
             {
-                if (!SceneManager.GetSceneByName(scene).isLoaded)
-                {
-                    SortedScenesToUnload.Remove(scene);
-                    return;
-                }
-                if (SceneManager.sceneCount == 1)
-                {
-                    Debug.LogWarning($"Could not unload scene {scene}, as it is last scene");
-                    SortedScenesToUnload.Remove(scene);
-                    return;
-                }
-                for (int i = 0; i < SceneManager.sceneCount; i++)
-                {
-                    if (!NOSceneDependencyData.SceneDependsOn(SceneManager.GetSceneAt(i).name, scene)) continue;
-                    
-                    Debug.LogWarning($"Could not unload scene {scene}, as scene {SceneManager.GetSceneAt(i).name} depends on it");
-                    SortedScenesToUnload.Remove(scene);
-                    return;
-                }
-                OnBeforeSceneUnloaded?.Invoke(SceneManager.GetSceneByName(scene));
-                await Awaitable.FromAsyncOperation(SceneManager.UnloadSceneAsync(scene));
+                OnBeforeSceneUnloaded?.Invoke( SceneManager.GetSceneByName(scene));
                 SortedScenesToUnload.Remove(scene);
+                LoadSceneCommand();
+                return;
             }
+            if (SceneManager.sceneCount == 1)
+            {
+                Debug.LogWarning($"Could not unload scene {scene}, as it is last scene");
+                SortedScenesToUnload.Remove(scene);
+                LoadSceneCommand();
+                return;
+            }
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                if (!NOSceneDependencyData.SceneDependsOn(SceneManager.GetSceneAt(i).name, scene)) continue;
+                    
+                Debug.LogWarning($"Could not unload scene {scene}, as scene {SceneManager.GetSceneAt(i).name} depends on it");
+                SortedScenesToUnload.Remove(scene);
+                LoadSceneCommand();
+                return;
+            }
+            
+            OnBeforeSceneUnloaded?.Invoke(SceneManager.GetSceneByName(scene));
+            SceneLoadingOperation = SceneManager.UnloadSceneAsync(scene);
+            SceneLoadingOperation.completed += Completed;
+            
+            void Completed(AsyncOperation op)
+            {
+                SortedScenesToUnload.Remove(scene);
+                LoadSceneCommand();
+            };
         }
     }
 }

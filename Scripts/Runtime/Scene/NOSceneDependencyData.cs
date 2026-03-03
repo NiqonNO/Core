@@ -16,18 +16,37 @@ namespace NiqonNO.Core.Scene
          OnValueChanged(nameof(ValidateChange), true)]
         private List<SceneDependencyPair> DependencyTree = new();
 
-        public static SortedSet<string> GetSceneDependencies(string scene)
+        public static List<string> GetSceneDependencies(string scene, bool rootAtTop)
         {
-            return GetSceneDependencies(scene, new(new SceneDepthComparer(true)));
+            var result = new List<string>();
+            var visited = new HashSet<string>();
+            Visit(scene, visited, result);
+            if(rootAtTop)
+                result.Reverse();
+            return result;
         }
 
-        public static SortedSet<string> GetSceneDependencies(string scene, SortedSet<string> sceneCollection)
+        public static List<string> GetSceneDependencies(string scene, ICollection<string> existingCollection, bool rootAtTop)
         {
-            if (sceneCollection.Contains(scene) || !PersistentSceneDependency.ContainsKey(scene))
-                return sceneCollection;
-            sceneCollection.Add(scene);
-            return PersistentSceneDependency[scene].Aggregate(sceneCollection,
-                (current, sceneDependency) => GetSceneDependencies(sceneDependency, current));
+            var result = GetSceneDependencies(scene, rootAtTop);
+
+            foreach (var s in existingCollection)
+            {
+                if (!result.Contains(s))
+                    result.Add(s);
+            }
+
+            return result;
+        }
+
+        private static void Visit(string scene, HashSet<string> visited, List<string> result)
+        {
+            if (!visited.Add(scene)) return;
+            if (!PersistentSceneDependency.TryGetValue(scene, out var dependencies)) return;
+            foreach (var dep in dependencies)
+                Visit(dep, visited, result);
+
+            result.Add(scene);
         }
 #if UNITY_EDITOR
         public static void ValidateData()
@@ -80,27 +99,6 @@ namespace NiqonNO.Core.Scene
                 SceneDependencies = values;
             }
             private IEnumerable<string> GetScenes => NOSceneUtility.GetScenesInBuildSettings();
-        }
-
-        internal class SceneDepthComparer : IComparer<string>
-        {
-            private int Direction;
-
-            public SceneDepthComparer(bool topFirst)
-            {
-                Direction = topFirst ? 1 : -1;
-            }
-
-            public int Compare(string x, string y)
-            {
-                if (x == y)
-                    return 0;
-                if (SceneDependsOn(x, y))
-                    return 1 * Direction;
-                if (SceneDependsOn(y, x))
-                    return -1 * Direction;
-                return string.Compare(x, y, StringComparison.Ordinal) * Direction;
-            }
         }
 
         public static bool SceneDependsOn(string item, string dependency)

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using NiqonNO.Core.Utility;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
@@ -9,6 +10,9 @@ namespace NiqonNO.Core.Scene
 {
     public class NOSceneManager : NOManagerWithStateSO<NOSceneManagerState>
     {
+        [SerializeField, ValueDropdown(nameof(GetScenes))]
+        public string MainScene;
+        
         [SerializeField, HideLabel]
         private NOSceneDependencyData SceneDependencyTree;
 
@@ -30,14 +34,20 @@ namespace NiqonNO.Core.Scene
         public override void Initialize()
         {
             base.Initialize();
-            SceneManager.sceneLoaded += CheckGameReady;
+#if UNITY_EDITOR
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                LoadScene(SceneManager.GetSceneAt(i).name);
+            }
+#else
+            SceneManager.sceneLoaded += WaitForBootstrap;
+#endif
         }
 
-        private void CheckGameReady(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadMode)
+        private void WaitForBootstrap(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadMode)
         {
-            SetupSceneContext(scene);
-            if (SceneManager.sceneCount != LoadedScenes.Count) return;
-            SceneManager.sceneLoaded -= CheckGameReady;
+            SceneManager.sceneLoaded -= WaitForBootstrap;
+            LoadScene(MainScene);
         }
 
         [Button]
@@ -91,43 +101,30 @@ namespace NiqonNO.Core.Scene
         
         private void SetupSceneContext(UnityEngine.SceneManagement.Scene scene)
         {
-            var contextFound = false;
+            if (LoadedScenes.ContainsKey(scene.name)) return;
+            
+            NOSceneContext context = null;
             foreach (var rootObject in scene.GetRootGameObjects())
             {
-                if (!rootObject.TryGetComponent(out NOSceneContext context)) continue;
+                if (!rootObject.TryGetComponent(out context)) continue;
                 
-                if (contextFound)
-                {
-                    Debug.LogWarning($"More than one objects of type {nameof(NOSceneContext)} have been found on \"{scene.name}\" scene.");
-                }
-
-                contextFound = true;
-                if (context.MainScene)
-                    SceneManager.SetActiveScene(scene);
+                if (context.MainScene) SceneManager.SetActiveScene(scene);
                 context.SetupSceneContext();
-                LoadedScenes.Add(scene.name, context);
+                break;
             }
 
-            if (contextFound) return;
-            LoadedScenes.Add(scene.name, null);
-            Debug.LogWarning($"No object of type {nameof(NOSceneContext)} have been found on \"{scene.name}\" scene.");
+            LoadedScenes.Add(scene.name, context);
         }
         
         private void DisposeSceneContext(UnityEngine.SceneManagement.Scene scene)
         {
-            if (!LoadedScenes.TryGetValue(scene.name, out var context))
+            if (!LoadedScenes.TryGetValue(scene.name, out var context)) return;
+            
+            if (context != null)
             {
-                Debug.LogWarning($"Could not find {nameof(NOSceneContext)} for \"{scene.name}\" scene to dispose.");
-                return;
-            }
-            if (context == null)
-            {
-                Debug.LogWarning($"{nameof(NOSceneContext)} for \"{scene.name}\" scene is missing.");
-                LoadedScenes.Remove(scene.name);
-                return;
+                context.DisposeSceneContext();
             }
             
-            context.DisposeSceneContext();
             LoadedScenes.Remove(scene.name);
         }
         
@@ -146,5 +143,7 @@ namespace NiqonNO.Core.Scene
 
             base.Dispose();
         }
+        
+        private IEnumerable<string> GetScenes => NOSceneUtility.GetScenesInBuildSettings();
     }
 }
