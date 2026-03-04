@@ -14,9 +14,9 @@ namespace NiqonNO.Core
         
 		public override void Dispose()
 		{
-			foreach (var states in RuntimeState.States.Values)
+			foreach (var state in RuntimeState.States.Values)
 			{
-				DestroyAsset(states);
+				Destroy(state);
 			}
 
 			RuntimeState.States.Clear();
@@ -25,7 +25,7 @@ namespace NiqonNO.Core
 
 		protected TDataState CreateDataState(TData data)
 		{
-			TDataState clipState = CreateAsset<TDataState>();
+			TDataState clipState = Context.Factory.CreateAsset<TDataState>();
 			clipState.Initialize(data);
 			RuntimeState.States.Add(data, clipState);
 			return clipState;

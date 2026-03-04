@@ -22,7 +22,7 @@ namespace NiqonNO.Core.Scene
         [SerializeField] 
         private UnityEvent OnLoadingFinishedEvent;
 
-        private Dictionary<string, NOSceneContext>  LoadedScenes => RuntimeState.LoadedScenes;
+        private Dictionary<UnityEngine.SceneManagement.Scene, NOSceneContext>  LoadedScenes => RuntimeState.LoadedScenes;
         private bool IsLoading => LoadSceneCommand != null;
         
         private NOSceneLoadCommand LoadSceneCommand
@@ -101,7 +101,7 @@ namespace NiqonNO.Core.Scene
         
         private void SetupSceneContext(UnityEngine.SceneManagement.Scene scene)
         {
-            if (LoadedScenes.ContainsKey(scene.name)) return;
+            if (LoadedScenes.ContainsKey(scene)) return;
             
             NOSceneContext context = null;
             foreach (var rootObject in scene.GetRootGameObjects())
@@ -109,23 +109,23 @@ namespace NiqonNO.Core.Scene
                 if (!rootObject.TryGetComponent(out context)) continue;
                 
                 if (context.MainScene) SceneManager.SetActiveScene(scene);
-                context.SetupSceneContext();
+                context.InitializeContext();
                 break;
             }
 
-            LoadedScenes.Add(scene.name, context);
+            LoadedScenes.Add(scene, context);
         }
         
         private void DisposeSceneContext(UnityEngine.SceneManagement.Scene scene)
         {
-            if (!LoadedScenes.TryGetValue(scene.name, out var context)) return;
+            if (!LoadedScenes.TryGetValue(scene, out var context)) return;
             
             if (context != null)
             {
-                context.DisposeSceneContext();
+                context.DisposeContext();
             }
             
-            LoadedScenes.Remove(scene.name);
+            LoadedScenes.Remove(scene);
         }
         
         public override void Dispose()
@@ -138,7 +138,7 @@ namespace NiqonNO.Core.Scene
             foreach (var scene in LoadedScenes.Reverse())
             {
                 if (!scene.Value) continue;
-                scene.Value.DisposeSceneContext();
+                scene.Value.DisposeContext();
             }
 
             base.Dispose();

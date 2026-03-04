@@ -6,7 +6,7 @@ namespace NiqonNO.Core.Scene
     public class NOSceneManagerState : NOManagerState
     {
         [ReadOnly, ShowInInspector]
-        public Dictionary<string, NOSceneContext> LoadedScenes = new();
+        public Dictionary<UnityEngine.SceneManagement.Scene, NOSceneContext> LoadedScenes = new();
 
         [ReadOnly, ShowInInspector] 
         public NOSceneLoadCommand LoadSceneCommand;
