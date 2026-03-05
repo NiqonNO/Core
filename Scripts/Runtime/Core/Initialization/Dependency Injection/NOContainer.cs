@@ -63,6 +63,7 @@ namespace NiqonNO.Core
             }
         }
 
+        private INOContext ResolveContext() => Resolve(typeof(INOContext)) as INOContext;
         private T Resolve<T>() where T : INOService => (T)Resolve(typeof(T));
         private object Resolve(Type serviceType)
         {

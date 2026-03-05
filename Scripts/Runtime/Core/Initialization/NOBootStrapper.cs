@@ -17,6 +17,7 @@ namespace NiqonNO.Core
 		{
 			Application.quitting += Dispose;
 			Instance = new NOBootStrapper();
+			NOContainer.ResetStaticState();
 			Instance.LoadProjectContext();
 		}
 		private static void Dispose()

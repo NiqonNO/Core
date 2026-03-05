@@ -12,13 +12,7 @@ namespace NiqonNO.Core
 		private static readonly Dictionary<string, NOContainer> SceneContext = new();
 		private static readonly Dictionary<string, List<IInitializable>> WaitingForInitialization = new();
 
-		static NOContainer()
-		{
-			ResetStaticState();
-		}
-
-		[UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
-		private static void ResetStaticState()
+		public static void ResetStaticState()
 		{
 			SceneContext.Clear();
 			WaitingForInitialization.Clear();
@@ -53,6 +47,12 @@ namespace NiqonNO.Core
 			}
 			list.Add(initializable);
 		}
+		private static void InitializeInitializable(NOContainer container, IInitializable initializable)
+		{
+			container.Inject(initializable);
+			initializable.Initialize();
+		}
+		
 		public static void RegisterContainer(NOContainer container)
 		{
 			if (container == null)
@@ -67,17 +67,28 @@ namespace NiqonNO.Core
 			}
 			WaitingForInitialization.Remove(container.MyScope);
 		}
-		private static void InitializeInitializable(NOContainer container, IInitializable initializable)
-		{
-			container.Inject(initializable);
-			initializable.Initialize();
-		}
 
 		public static void UnregisterContainer(NOContainer container)
 		{
 			if (container == null) return;
 			SceneContext.Remove(container.MyScope);
 		}
-		
+
+		public static void SetupSceneContext(UnityEngine.SceneManagement.Scene scene)
+		{
+			NOSceneContext context = null;
+			foreach (var rootObject in scene.GetRootGameObjects())
+			{
+				if (!rootObject.TryGetComponent<NOSceneContext>(out context)) continue;
+                context.InitializeContext();
+				break;
+			}
+		}
+
+		public static void DisposeSceneContext(UnityEngine.SceneManagement.Scene scene)
+		{
+			if (!SceneContext.TryGetValue(scene.name, out var container)) return;
+			container.ResolveContext().DisposeContext();
+		}
 	}
 }

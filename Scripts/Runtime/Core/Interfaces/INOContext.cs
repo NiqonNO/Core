@@ -39,5 +39,8 @@ namespace NiqonNO.Core
 	{
 		NOContainer Container { get; }
 		NOFactory Factory { get; }
+
+		void InitializeContext();
+		void DisposeContext();
 	}
 }

@@ -29,6 +29,9 @@ namespace NiqonNO.Core
             if (!ScriptableObjectManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerSO>).UnregisterServices();
             NOContainer.UnregisterContainer(Container);
+
+            Container = null;
+            Factory = null;
         }
     }
 }

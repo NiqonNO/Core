@@ -33,12 +33,12 @@ namespace NiqonNO.Core.Scene
         {
             LoadSceneCommand();
         }
-
-        public void Complete()
+        public void Cancel()
         {
+            SortedScenesToLoad.Clear();
+            SortedScenesToUnload.Clear();
+            OnLoadingFinished?.Invoke();
         }
-
-        public void Cancel() => Complete();
 
         private void LoadSceneCommand()
         {

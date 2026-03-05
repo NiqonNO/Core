@@ -7,9 +7,6 @@ namespace NiqonNO.Core
     public class NOSceneContext : NOMonoBehaviour, INOContext<NOManagerSO>, INOContext<NOManagerMonoBehaviour>
     {
         [field: SerializeField] 
-        public bool MainScene { get; private set; }
-        
-        [field: SerializeField] 
         public NOManagerMonoBehaviour[] MonoBehaviourManagers { get; private set; }
         IEnumerable<NOManagerMonoBehaviour> INOContext<NOManagerMonoBehaviour>.Managers => MonoBehaviourManagers;
         
