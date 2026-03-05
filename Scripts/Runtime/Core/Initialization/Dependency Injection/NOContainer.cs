@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using NiqonNO.Core.Scene;
 
 namespace NiqonNO.Core
@@ -53,10 +52,12 @@ namespace NiqonNO.Core
 
         public void Inject(object target)
         {
+            if (target == null)
+                throw new ArgumentNullException(nameof(target));
+            
             var fields = GetInjectableFields(target.GetType());
             foreach (var field in fields)
             {
-                if (field.GetCustomAttribute<NOInjectAttribute>() == null) continue;
                 var service = Resolve(field.FieldType);
                 field.SetValue(target, service);
             }

@@ -9,9 +9,22 @@ namespace NiqonNO.Core
 	{
 		private static readonly Dictionary<Type, FieldInfo[]> FieldCache = new();
 
-		private static Dictionary<string, NOContainer> SceneContext;
-		private static Dictionary<string, List<IInitializable>> WaitingForInitialization;
+		private static readonly Dictionary<string, NOContainer> SceneContext = new();
+		private static readonly Dictionary<string, List<IInitializable>> WaitingForInitialization = new();
 
+		static NOContainer()
+		{
+			ResetStaticState();
+		}
+
+		[UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+		private static void ResetStaticState()
+		{
+			SceneContext.Clear();
+			WaitingForInitialization.Clear();
+			FieldCache.Clear();
+		}
+		
 		private static FieldInfo[] GetInjectableFields(Type type)
 		{
 			if(FieldCache.TryGetValue(type, out var info)) return info;
@@ -24,6 +37,9 @@ namespace NiqonNO.Core
 		
 		public static void EnqueueForInitialization(string scope, IInitializable initializable)
 		{
+			if (initializable == null) return;
+			scope ??= string.Empty;
+			
 			if (SceneContext.TryGetValue(scope, out var context))
 			{
 				InitializeInitializable(context, initializable);
@@ -37,8 +53,11 @@ namespace NiqonNO.Core
 			}
 			list.Add(initializable);
 		}
-		public static void RegisterContext(NOContainer container)
+		public static void RegisterContainer(NOContainer container)
 		{
+			if (container == null)
+				throw new ArgumentNullException(nameof(container));
+			
 			SceneContext[container.MyScope] = container;
 			if (!WaitingForInitialization.TryGetValue(container.MyScope, out var initializables)) return;
 			
@@ -54,8 +73,9 @@ namespace NiqonNO.Core
 			initializable.Initialize();
 		}
 
-		public static void UnregisterContext(NOContainer container)
+		public static void UnregisterContainer(NOContainer container)
 		{
+			if (container == null) return;
 			SceneContext.Remove(container.MyScope);
 		}
 		

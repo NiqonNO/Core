@@ -30,7 +30,7 @@ namespace NiqonNO.Core
                 (this as INOContext<NOManagerSO>).RegisterServices();
             if (!MonoBehaviourManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerMonoBehaviour>).RegisterServices();
-            NOContainer.RegisterContext(Container);
+            NOContainer.RegisterContainer(Container);
         }
 
         public void DisposeContext()
@@ -39,7 +39,7 @@ namespace NiqonNO.Core
                 (this as INOContext<NOManagerSO>).UnregisterServices();
             if (!MonoBehaviourManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerMonoBehaviour>).UnregisterServices();
-            NOContainer.UnregisterContext(Container);
+            NOContainer.UnregisterContainer(Container);
         }
     }
 }

@@ -19,21 +19,25 @@ namespace NiqonNO.Core.Scene
         public static List<string> GetSceneDependencies(string scene, bool rootAtTop)
         {
             var result = new List<string>();
+            if (string.IsNullOrWhiteSpace(scene)) return result;
+
             var visited = new HashSet<string>();
             Visit(scene, visited, result);
-            if(rootAtTop)
+            if (rootAtTop)
                 result.Reverse();
+            
             return result;
         }
 
         public static List<string> GetSceneDependencies(string scene, ICollection<string> existingCollection, bool rootAtTop)
         {
             var result = GetSceneDependencies(scene, rootAtTop);
+            var unique = new HashSet<string>(result);
 
             foreach (var s in existingCollection)
             {
-                if (!result.Contains(s))
-                    result.Add(s);
+                if (string.IsNullOrWhiteSpace(s) || !unique.Add(s)) continue;
+                result.Add(s);
             }
 
             return result;
@@ -41,16 +45,19 @@ namespace NiqonNO.Core.Scene
 
         private static void Visit(string scene, HashSet<string> visited, List<string> result)
         {
-            if (!visited.Add(scene)) return;
-            if (!TryGetSceneParent(scene, out var dependency)) return;
-            
-            Visit(dependency, visited, result);
+            if (string.IsNullOrWhiteSpace(scene) || !visited.Add(scene)) return;
+            if (TryGetSceneParent(scene, out var dependency) && !string.IsNullOrWhiteSpace(dependency))
+            {
+                Visit(dependency, visited, result);
+            }
             result.Add(scene);
         }
 
         public static bool TryGetSceneParent(string scene, out string parent)
         {
-            return PersistentSceneDependency.TryGetValue(scene, out parent);
+            if (!string.IsNullOrWhiteSpace(scene)) return PersistentSceneDependency.TryGetValue(scene, out parent);
+            parent = string.Empty;
+            return false;
         }
 #if UNITY_EDITOR
         public static void ValidateData()
@@ -107,8 +114,24 @@ namespace NiqonNO.Core.Scene
 
         public static bool SceneDependsOn(string item, string dependency)
         {
-            if (!PersistentSceneDependency.TryGetValue(item, out var dep)) return false;
-            return dep == dependency || SceneDependsOn(dep, dependency);
+            if (string.IsNullOrWhiteSpace(item) || string.IsNullOrWhiteSpace(dependency))
+                return false;
+
+            var visited = new HashSet<string>();
+            var current = item;
+
+            while (!string.IsNullOrWhiteSpace(current) && visited.Add(current))
+            {
+                if (!PersistentSceneDependency.TryGetValue(current, out var parent) || string.IsNullOrWhiteSpace(parent))
+                    return false;
+
+                if (parent == dependency)
+                    return true;
+
+                current = parent;
+            }
+
+            return false;
         }
     }
 }

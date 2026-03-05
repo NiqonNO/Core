@@ -45,7 +45,10 @@ namespace NiqonNO.Core
 		
 		private void DisposeProjectContext()
 		{
+			if (ProjectContext == null) return;
 			ProjectContext.DisposeContext();
+			ProjectContext = null;
+
 		}
 	}
 }
