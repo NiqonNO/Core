@@ -99,7 +99,7 @@ namespace NiqonNO.Core.Scene
             LoadSceneCommand = null;
         }
         
-        private void SetupSceneContext(UnityEngine.SceneManagement.Scene scene)
+        private void SetupSceneContext(UnityEngine.SceneManagement.Scene scene)// => NOContainer.SetupSceneContext(scene);
         {
             if (LoadedScenes.ContainsKey(scene)) return;
             
@@ -116,7 +116,7 @@ namespace NiqonNO.Core.Scene
             LoadedScenes.Add(scene, context);
         }
         
-        private void DisposeSceneContext(UnityEngine.SceneManagement.Scene scene)
+        private void DisposeSceneContext(UnityEngine.SceneManagement.Scene scene)// => NOContainer.DisposeSceneContext(scene);
         {
             if (!LoadedScenes.TryGetValue(scene, out var context)) return;
             

@@ -20,9 +20,9 @@ namespace NiqonNO.Core
         public NOContainer Container { get; set; }
         public NOFactory Factory { get; set;  }
         
-        public void InitializeContext(/*INOContext parent*/)
+        public void InitializeContext()
         {
-            Container = new NOContainer(/*parent*/);
+            Container = new NOContainer(gameObject.scene.name);
             Factory = new NOFactory(Container);
 
             Container.RegisterContext(this);
@@ -30,7 +30,7 @@ namespace NiqonNO.Core
                 (this as INOContext<NOManagerSO>).RegisterServices();
             if (!MonoBehaviourManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerMonoBehaviour>).RegisterServices();
-            NOContextLocator.RegisterContext(gameObject.scene, this);
+            NOContainer.RegisterContext(Container);
         }
 
         public void DisposeContext()
@@ -39,7 +39,7 @@ namespace NiqonNO.Core
                 (this as INOContext<NOManagerSO>).UnregisterServices();
             if (!MonoBehaviourManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerMonoBehaviour>).UnregisterServices();
-            NOContextLocator.UnregisterContext(gameObject.scene);
+            NOContainer.UnregisterContext(Container);
         }
     }
 }

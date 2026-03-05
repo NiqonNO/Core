@@ -21,12 +21,14 @@ namespace NiqonNO.Core
             Container.RegisterContext(this);
             if (ScriptableObjectManagers.IsNullOrEmpty()) return;
             (this as INOContext<NOManagerSO>).RegisterServices();
+            NOContainer.RegisterContext(Container);
         }
 
         public void DisposeContext()
         {
             if (ScriptableObjectManagers.IsNullOrEmpty()) return;
             (this as INOContext<NOManagerSO>).UnregisterServices();
+            NOContainer.UnregisterContext(Container);
         }
     }
 }

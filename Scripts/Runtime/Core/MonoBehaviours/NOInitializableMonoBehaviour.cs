@@ -4,7 +4,7 @@
     {
         private void Awake()
         {
-            NOContextLocator.EnqueueForInitialization(gameObject.scene, this);
+            NOContainer.EnqueueForInitialization(gameObject.scene.name, this);
         }
 
         public abstract void Initialize();

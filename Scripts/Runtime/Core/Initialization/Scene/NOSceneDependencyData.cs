@@ -10,7 +10,7 @@ namespace NiqonNO.Core.Scene
     [Serializable]
     public class NOSceneDependencyData : ISerializationCallbackReceiver
     {
-        private static Dictionary<string, string[]> PersistentSceneDependency { get; set; } = new();
+        private static Dictionary<string, string> PersistentSceneDependency { get; set; } = new();
 
         [SerializeField, ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false),
          OnValueChanged(nameof(ValidateChange), true)]
@@ -42,11 +42,15 @@ namespace NiqonNO.Core.Scene
         private static void Visit(string scene, HashSet<string> visited, List<string> result)
         {
             if (!visited.Add(scene)) return;
-            if (!PersistentSceneDependency.TryGetValue(scene, out var dependencies)) return;
-            foreach (var dep in dependencies)
-                Visit(dep, visited, result);
-
+            if (!TryGetSceneParent(scene, out var dependency)) return;
+            
+            Visit(dependency, visited, result);
             result.Add(scene);
+        }
+
+        public static bool TryGetSceneParent(string scene, out string parent)
+        {
+            return PersistentSceneDependency.TryGetValue(scene, out parent);
         }
 #if UNITY_EDITOR
         public static void ValidateData()
@@ -54,7 +58,7 @@ namespace NiqonNO.Core.Scene
             var newDictionary =  NOSceneUtility.GetScenesInBuildSettings().ToDictionary(
                 scene => scene,
                 scene => PersistentSceneDependency.TryGetValue(scene, value: out var value)
-                    ? value : new string[0]);
+                    ? value : String.Empty);
             PersistentSceneDependency = newDictionary;
         }
 #endif
@@ -63,7 +67,7 @@ namespace NiqonNO.Core.Scene
             PersistentSceneDependency.Clear();
             foreach (var pair in DependencyTree)
             {
-                PersistentSceneDependency[pair.SceneName] = pair.SceneDependencies.Clone() as string[];
+                PersistentSceneDependency[pair.SceneName] = pair.SceneParent;
             }
         }
 
@@ -72,7 +76,7 @@ namespace NiqonNO.Core.Scene
             PersistentSceneDependency.Clear();
             foreach (var pair in DependencyTree)
             {
-                PersistentSceneDependency[pair.SceneName] = pair.SceneDependencies.Clone() as string[];
+                PersistentSceneDependency[pair.SceneName] = pair.SceneParent;
             }
         }
 
@@ -81,7 +85,7 @@ namespace NiqonNO.Core.Scene
             DependencyTree.Clear();
             foreach (var item in PersistentSceneDependency)
             {
-                DependencyTree.Add(new SceneDependencyPair(item.Key, item.Value.Clone() as string[]));
+                DependencyTree.Add(new SceneDependencyPair(item.Key, item.Value));
             }
         }
 
@@ -91,30 +95,20 @@ namespace NiqonNO.Core.Scene
             [SerializeField, HideLabel, ReadOnly] public string SceneName;
 
             [SerializeField, ValueDropdown(nameof(GetScenes), IsUniqueList = true)]
-            public string[] SceneDependencies;
+            public string SceneParent;
 
-            public SceneDependencyPair(string key, string[] values)
+            public SceneDependencyPair(string key, string value)
             {
                 SceneName = key;
-                SceneDependencies = values;
+                SceneParent = value;
             }
             private IEnumerable<string> GetScenes => NOSceneUtility.GetScenesInBuildSettings();
         }
 
         public static bool SceneDependsOn(string item, string dependency)
         {
-            if (PersistentSceneDependency.TryGetValue(item, out var deps))
-            {
-                foreach (var dep in deps)
-                {
-                    if (dep == dependency || SceneDependsOn(dep, dependency))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+            if (!PersistentSceneDependency.TryGetValue(item, out var dep)) return false;
+            return dep == dependency || SceneDependsOn(dep, dependency);
         }
     }
 }
