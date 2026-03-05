@@ -7,7 +7,7 @@ namespace NiqonNO.Core
     public partial class NOContainer
     {
         private readonly Dictionary<Type, object> Registrations = new();
-        public readonly NOContainer Parent;
+        private readonly NOContainer Parent;
         public readonly string MyScope = string.Empty;
 
         public NOContainer()
@@ -18,14 +18,22 @@ namespace NiqonNO.Core
         {
             MyScope = myScope;
             if(NOSceneDependencyData.TryGetSceneParent(myScope, out var parent) &&
-               SceneContext.TryGetValue(parent, out var parentContainer))
+               Registry.TryGetContainer(parent, out var parentContainer))
                 Parent = parentContainer;
         }
-
-        public void RegisterContext(INOContext service)
+        
+        public void ActivateScope(INOContext context)
         {
-            Registrations[typeof(INOContext)] = service;
+            Registrations[typeof(INOContext)] = context;
+            Registry.RegisterContainer(this);
         }
+
+        public void DeactivateScope()
+        {
+            Registrations.Remove(typeof(INOContext));
+            Registry.UnregisterContainer(this);
+        }
+
 
         public void RegisterService(INOManager manager)
         {
@@ -63,7 +71,6 @@ namespace NiqonNO.Core
             }
         }
 
-        private INOContext ResolveContext() => Resolve(typeof(INOContext)) as INOContext;
         private T Resolve<T>() where T : INOService => (T)Resolve(typeof(T));
         private object Resolve(Type serviceType)
         {

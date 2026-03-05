@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using NiqonNO.Core.Utility;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -21,7 +22,8 @@ namespace NiqonNO.Core.Scene
         [SerializeField] 
         private UnityEvent OnLoadingFinishedEvent;
 
-        private List<UnityEngine.SceneManagement.Scene>  LoadedScenes => RuntimeState.LoadedScenes;
+        private Dictionary<UnityEngine.SceneManagement.Scene, NOSceneContext> LoadedScenes => RuntimeState.LoadedScenes;
+
         private bool IsLoading => LoadSceneCommand != null;
         
         private NOSceneLoadCommand LoadSceneCommand
@@ -99,16 +101,29 @@ namespace NiqonNO.Core.Scene
         
         private void SetupSceneContext(UnityEngine.SceneManagement.Scene scene)
         {
-            if (LoadedScenes.Contains(scene)) return;
-            LoadedScenes.Add(scene);
-            NOContainer.SetupSceneContext(scene);
+            if (LoadedScenes.ContainsKey(scene)) return;
+
+            NOSceneContext context = null;
+            foreach (var rootObject in scene.GetRootGameObjects())
+            {
+                if (!rootObject.TryGetComponent(out context)) continue;
+                context.InitializeContext();
+                break;
+            }
+
+            LoadedScenes[scene] = context;
             if (scene.name.Equals(MainScene)) SceneManager.SetActiveScene(scene);
         }
         
         private void DisposeSceneContext(UnityEngine.SceneManagement.Scene scene)
         {
-            if (!LoadedScenes.Remove(scene)) return;
-            NOContainer.DisposeSceneContext(scene);
+            if (!LoadedScenes.TryGetValue(scene, out var context)) return;
+            if (context != null)
+            {
+                context.DisposeContext();
+            }
+            LoadedScenes.Remove(scene);
+
         }
         
         public override void Dispose()
@@ -118,10 +133,12 @@ namespace NiqonNO.Core.Scene
                 LoadSceneCommand.Cancel();
             }
 
-            for (var i = LoadedScenes.Count - 1; i >= 0 ; i--)
+            foreach (var scene in LoadedScenes.Reverse())
             {
-                NOContainer.DisposeSceneContext( LoadedScenes[i]);
+                if (scene.Value == null) continue;
+                scene.Value.DisposeContext();
             }
+            LoadedScenes.Clear();
 
             base.Dispose();
         }

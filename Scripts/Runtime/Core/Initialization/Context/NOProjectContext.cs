@@ -18,17 +18,16 @@ namespace NiqonNO.Core
             Container = new NOContainer();
             Factory = new NOFactory(Container);
             
-            Container.RegisterContext(this);
             if (!ScriptableObjectManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerSO>).RegisterServices();
-            NOContainer.RegisterContainer(Container);
+            Container.ActivateScope(this);
         }
 
         public void DisposeContext()
         {
             if (!ScriptableObjectManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerSO>).UnregisterServices();
-            NOContainer.UnregisterContainer(Container);
+            Container.DeactivateScope();
 
             Container = null;
             Factory = null;

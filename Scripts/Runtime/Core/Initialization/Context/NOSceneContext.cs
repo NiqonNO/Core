@@ -22,12 +22,11 @@ namespace NiqonNO.Core
             Container = new NOContainer(gameObject.scene.name);
             Factory = new NOFactory(Container);
 
-            Container.RegisterContext(this);
             if (!ScriptableObjectManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerSO>).RegisterServices();
             if (!MonoBehaviourManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerMonoBehaviour>).RegisterServices();
-            NOContainer.RegisterContainer(Container);
+            Container.ActivateScope(this);
         }
 
         public void DisposeContext()
@@ -36,7 +35,10 @@ namespace NiqonNO.Core
                 (this as INOContext<NOManagerSO>).UnregisterServices();
             if (!MonoBehaviourManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerMonoBehaviour>).UnregisterServices();
-            NOContainer.UnregisterContainer(Container);
+            Container.DeactivateScope();
+            
+            Container = null;
+            Factory = null;
         }
     }
 }
