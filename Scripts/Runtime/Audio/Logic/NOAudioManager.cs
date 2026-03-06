@@ -11,5 +11,9 @@ namespace NiqonNO.Core.Audio.Logic
 			base.Dispose();
 		}
 
+		public void StopAllInstances(NOSoundClipData data)
+		{
+			GetClip(data).Dispose();
+		}
 	}
 }

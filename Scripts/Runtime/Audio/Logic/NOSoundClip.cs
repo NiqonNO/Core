@@ -4,57 +4,46 @@ namespace NiqonNO.Core.Audio.Logic
 {
 	public class NOSoundClip : NODataState<NOSoundClipData>
 	{
-		private readonly List<NOSoundInstanceHandle> ActiveInstances = new();
+		private readonly LinkedList<INOSoundInstance> ActiveInstances = new();
 
-		public NOSoundInstanceHandle Play(INOSoundPlaybackService playbackService, NOSoundPlaybackOptions options = null)
+		private int ActiveCount => ActiveInstances.Count;
+		private bool IsPlaying => ActiveCount > 0;
+		public bool MaxPlaying => ActiveCount >= Asset.MaxInstances;
+
+		public INOSoundInstance StealOldestInstance()
 		{
-			if (playbackService == null)
-				return NOSoundInstanceHandle.Invalid;
-
-			PruneInactiveInstances(playbackService);
-			if (ActiveInstances.Count >= Asset.MaxInstances)
-			{
-				var oldest = ActiveInstances[0];
-				playbackService.Stop(oldest, 0f, graceful: false);
-				ActiveInstances.RemoveAt(0);
-			}
-
-			var instance = playbackService.Play(Asset, options);
-			if (instance.IsValid)
-				ActiveInstances.Add(instance);
+			var instance = ActiveInstances.First.Value;
+			instance.ForceStop();
 			return instance;
 		}
 
-		public void StopAll(INOSoundPlaybackService playbackService, float fadeOutDuration = 0f, bool graceful = true)
+		public void Register(INOSoundInstance instance)
 		{
-			if (playbackService == null)
+			if (instance == null)
 				return;
-			playbackService.StopAll(Asset, fadeOutDuration, graceful);
-			ActiveInstances.Clear();
+
+			instance.Setup(this, ActiveInstances.AddLast(instance));
 		}
 
-		public bool IsOwned(NOSoundInstanceHandle instanceHandle)
+		public void Unregister(INOSoundInstance instance)
 		{
-			return ActiveInstances.Contains(instanceHandle);
-		}
+			if (instance?.Node == null)
+				return;
 
-		public void Unregister(NOSoundInstanceHandle instanceHandle)
-		{
-			ActiveInstances.Remove(instanceHandle);
+			ActiveInstances.Remove(instance.Node);
+			instance.ClearRegistration();
 		}
 
 		public void Dispose()
 		{
+			if (!IsPlaying)
+				return;
+
+			var toDispose = new List<INOSoundInstance>(ActiveInstances);
+			foreach (var instance in toDispose)
+				instance.ForceStop();
 			ActiveInstances.Clear();
 		}
 
-		private void PruneInactiveInstances(INOSoundPlaybackService playbackService)
-		{
-			for (var i = ActiveInstances.Count - 1; i >= 0; i--)
-			{
-				if (!playbackService.IsPlaying(ActiveInstances[i]))
-					ActiveInstances.RemoveAt(i);
-			}
-		}
 	}
 }

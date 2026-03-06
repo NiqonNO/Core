@@ -2,8 +2,9 @@ namespace NiqonNO.Core.Audio.World
 {
 	public interface INOSoundEmitterPoolService : INOService
 	{
-		NOSoundEmitter Acquire();
+		NOSoundEmitter AcquireAvailable();
 		void Return(NOSoundEmitter emitter);
+
 
 	}
 }

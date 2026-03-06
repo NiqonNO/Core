@@ -15,18 +15,16 @@ namespace NiqonNO.Core.Audio.Logic
 		[field: SerializeField] 
 		public bool Loop { get; private set; }
 		
-		
-		
 		[field: SerializeField, Range(0,256)]
 		public int Priority { get; private set; } = 128;
 		
 		[SerializeField, MinMaxSlider(0,1, true)]
 		private Vector2 VolumeRange = Vector2.one;
-		public float Volume => Random.Range(VolumeRange.x, VolumeRange.y);
+		public float ResolveVolume() => Random.Range(VolumeRange.x, VolumeRange.y);
 		
 		[SerializeField, MinMaxSlider(-3,3, true)]
 		private Vector2 PitchRange = Vector2.one;
-		public float Pitch => Random.Range(PitchRange.x, PitchRange.y);
+		public float ResolvePitch() => Random.Range(PitchRange.x, PitchRange.y);
 		
 		[field: SerializeField, Range(-1,1)]
 		public float StereoPan { get; private set; } = 0;

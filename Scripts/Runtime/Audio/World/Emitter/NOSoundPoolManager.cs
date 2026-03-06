@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using NiqonNO.Core.Audio.Logic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -12,6 +10,9 @@ namespace NiqonNO.Core.Audio.World
         private const int InitialPoolSize = 32;
         private readonly Queue<NOSoundEmitter> EmitterPool = new(InitialPoolSize);
         private readonly HashSet<NOSoundEmitter> ActiveEmitters = new(InitialPoolSize);
+
+        [SerializeField, Min(1)]
+        private int MaxEmitters = InitialPoolSize;
 
         [SerializeField, SceneObjectsOnly]
         private NOSoundEmitter EmitterTemplate;
@@ -33,9 +34,12 @@ namespace NiqonNO.Core.Audio.World
 
         private void InitializePool()
         {
-            for (int i = 1; i < InitialPoolSize; i++)
+            var poolSize = Mathf.Min(InitialPoolSize, MaxEmitters);
+            for (var i = 1; i < poolSize; i++)
                 EmitterPool.Enqueue(CreateEmitter());
+
             EmitterTemplate.Initialize();
+            EmitterTemplate.gameObject.SetActive(false);
             EmitterPool.Enqueue(EmitterTemplate);
         }
 
@@ -43,22 +47,33 @@ namespace NiqonNO.Core.Audio.World
         {
             var emitter = Instantiate(EmitterTemplate, transform);
             emitter.Initialize();
+            emitter.gameObject.SetActive(false);
             return emitter;
         }
 
-        public NOSoundEmitter Acquire()
+        public NOSoundEmitter AcquireAvailable()
         {
-            if (!EmitterPool.TryDequeue(out var emitter))
+            NOSoundEmitter emitter = null;
+            if (EmitterPool.TryDequeue(out var pooledEmitter))
+                emitter = pooledEmitter;
+            else if (ActiveEmitters.Count < MaxEmitters)
                 emitter = CreateEmitter();
 
+            if (emitter == null)
+                return null;
+
+            emitter.gameObject.SetActive(true);
             ActiveEmitters.Add(emitter);
             return emitter;
         }
 
         public void Return(NOSoundEmitter emitter)
         {
-            if (ActiveEmitters.Remove(emitter))
-                EmitterPool.Enqueue(emitter);
+            if (!ActiveEmitters.Remove(emitter))
+                return;
+
+            emitter.gameObject.SetActive(false);
+            EmitterPool.Enqueue(emitter);
         }
     }
 }

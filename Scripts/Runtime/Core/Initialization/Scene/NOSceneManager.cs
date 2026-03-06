@@ -100,7 +100,6 @@ namespace NiqonNO.Core.Scene
         
         private void SetupSceneContext(UnityEngine.SceneManagement.Scene scene)
         {
-            Debug.Log(scene.name);
             if (LoadedScenes.ContainsKey(scene)) return;
 
             NOSceneContext context = null;

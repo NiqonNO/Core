@@ -1,72 +1,73 @@
 using NiqonNO.Core.Audio.Logic;
+using UnityEngine;
 
 namespace NiqonNO.Core.Audio.World
 {
 	public class NOAudioPlayer : NOInitializableMonoBehaviour
 	{
-		[NOInject] private INOAudioService AudioService;
-		[NOInject] private INOSoundPlaybackService PlaybackService;
-
-		private NOSoundClip TrackedClip;
-		private NOSoundInstanceHandle TrackedInstance = NOSoundInstanceHandle.Invalid;
-
+		[NOInject] private INOAudioService AudioManager;
+		[NOInject] private INOSoundEmitterPoolService EmitterPool;
+		
+		[SerializeField]
+		private NOSoundPlaybackOptions Options;
+		
+		private INOSoundInstance TrackedInstance;
+		
 		public override void Initialize()
 		{
 		}
 
-		public void Play(NOSoundClipData clipData)
+		public void Play(NOSoundClipData clipData) => Play(clipData, false);
+		public void PlayTracked(NOSoundClipData clipData) => Play(clipData, true);
+		private void Play(NOSoundClipData clipData, bool track)
 		{
 			if (clipData == null)
 				return;
+			
+			var clip = AudioManager.GetClip(clipData);
+			var emitter = clip.MaxPlaying ? clip.StealOldestInstance() as NOSoundEmitter : EmitterPool.AcquireAvailable();
+			if (emitter == null)
+				return;
+			
+			clip.Register(emitter);
+			emitter.Play(clipData, Options, ReleaseTracked);
 
-			var clip = AudioService.GetClip(clipData);
-			var handle = clip.Play(PlaybackService);
-		}
-
-		public void PlayTracked(NOSoundClipData clipData)
-		{
-			if (clipData == null)
+			if (!track)
 				return;
 
-			TrackedClip = AudioService.GetClip(clipData);
-			TrackedInstance = TrackedClip.Play(PlaybackService);
+			if (TrackedInstance != null && TrackedInstance != emitter)
+				TrackedInstance.Stop();
+			TrackedInstance = emitter;
+
 		}
 
-		public void StopTracked() => StopTracked(0, true);
-		public void StopTracked(float fadeOutDuration, bool graceful = true)
+		void ReleaseTracked()
 		{
-			if (!TrackedInstance.IsValid)
-				return;
-
-			PlaybackService.Stop(TrackedInstance, fadeOutDuration, graceful);
-			TrackedClip.Unregister(TrackedInstance);
-			TrackedInstance = NOSoundInstanceHandle.Invalid;
-			TrackedClip = null;
+			TrackedInstance = null;
 		}
 
-		public void StopAll(NOSoundClipData clipData) => StopAll(clipData, 0, true);
-		public void StopAll(NOSoundClipData clipData, float fadeOutDuration, bool graceful = true)
+		public void StopTracked()
 		{
-			if (clipData == null)
+			if (TrackedInstance == null)
 				return;
 
-			var clip = AudioService.GetClip(clipData);
-			clip.StopAll(PlaybackService, fadeOutDuration, graceful);
+			TrackedInstance.Stop();
+			TrackedInstance = null;
+		}
+
+		public void StopAll(NOSoundClipData clipData)
+		{
+			AudioManager.StopAllInstances(clipData);
 		}
 
 		public void SetTrackedPitch(float pitch)
 		{
-			if (!TrackedInstance.IsValid)
-				return;
-			PlaybackService.SetPitch(TrackedInstance, pitch);
+			TrackedInstance?.SetPitch(pitch);
 		}
 
 		public void SetTrackedVolume(float volume)
 		{
-			if (PlaybackService == null || !TrackedInstance.IsValid)
-				return;
-			PlaybackService.SetVolume(TrackedInstance, volume);
+			TrackedInstance?.SetVolume(volume);
 		}
-
 	}
 }
