@@ -66,7 +66,7 @@ namespace NiqonNO.Core.Scene
                 LoadSceneCommand();
                 return;
             }
-
+            
             SceneLoadingOperation = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
             SceneLoadingOperation.completed += Completed;
 

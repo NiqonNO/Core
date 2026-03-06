@@ -35,20 +35,19 @@ namespace NiqonNO.Core.Scene
         public override void Initialize()
         {
             base.Initialize();
-#if UNITY_EDITOR
-            for (int i = 0; i < SceneManager.sceneCount; i++)
-            {
-                LoadScene(SceneManager.GetSceneAt(i).name);
-            }
-#else
             SceneManager.sceneLoaded += WaitForBootstrap;
-#endif
         }
 
         private void WaitForBootstrap(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadMode)
         {
+#if UNITY_EDITOR
+            SetupSceneContext(scene);
+            if (SceneManager.sceneCount != LoadedScenes.Count) return;
+            SceneManager.sceneLoaded -= WaitForBootstrap;
+#else
             SceneManager.sceneLoaded -= WaitForBootstrap;
             LoadScene(MainScene);
+#endif
         }
 
         [Button]
@@ -101,6 +100,7 @@ namespace NiqonNO.Core.Scene
         
         private void SetupSceneContext(UnityEngine.SceneManagement.Scene scene)
         {
+            Debug.Log(scene.name);
             if (LoadedScenes.ContainsKey(scene)) return;
 
             NOSceneContext context = null;
