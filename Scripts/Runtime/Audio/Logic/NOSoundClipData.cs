@@ -2,15 +2,20 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Audio;
 
-namespace NiqonNO.Core.Audio
+namespace NiqonNO.Core.Audio.Logic
 {
 	public class NOSoundClipData : NOData
 	{
+		[field: SerializeField] 
+		public int MaxInstances { get; private set; } = 8;
+		
 		[field: SerializeField]
 		public AudioMixerGroup MixerGroup { get; private set; }
 
 		[field: SerializeField] 
 		public bool Loop { get; private set; }
+		
+		
 		
 		[field: SerializeField, Range(0,256)]
 		public int Priority { get; private set; } = 128;
@@ -47,10 +52,19 @@ namespace NiqonNO.Core.Audio
 		
 		[field: SerializeField, BoxGroup("3D Sound Settings"), MinValue(nameof(MinDistance))]
 		public float MaxDistance { get; private set; } = 500;
+		
+		[field: SerializeField, Min(0f)]
+		public float DefaultFadeIn { get; private set; } = 0f;
 
-		[field: SerializeField] 
-		public int MaxInstances { get; private set; } = 8;
+		[field: SerializeField, Min(0f)]
+		public float DefaultFadeOut { get; private set; } = 0f;
 
+		[field: SerializeField, ShowIf(nameof(Loop)), BoxGroup("Advanced Loop")]
+		public AudioClip StartClip { get; private set; }
+
+		[field: SerializeField, ShowIf(nameof(Loop)), BoxGroup("Advanced Loop")]
+		public AudioClip EndClip { get; private set; }
+		public bool HasAdvancedLoop => Loop && (StartClip != null || EndClip != null);
 
 		[SerializeField]
 		private AudioClip[] Clips;

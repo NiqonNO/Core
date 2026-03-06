@@ -109,7 +109,7 @@ namespace NiqonNO.Core.Scene
                 SceneName = key;
                 SceneParent = value;
             }
-            private IEnumerable<string> GetScenes => NOSceneUtility.GetScenesInBuildSettings();
+            private IEnumerable<string> GetScenes => NOSceneUtility.GetScenesInBuildSettings().Prepend("");
         }
 
         public static bool SceneDependsOn(string item, string dependency)
