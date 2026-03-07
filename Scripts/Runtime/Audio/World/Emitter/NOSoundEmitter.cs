@@ -9,77 +9,57 @@ namespace NiqonNO.Core.Audio.World
 	public class NOSoundEmitter : NOMonoBehaviour, INOSoundInstance
 	{
 		[SerializeField]
+		private NOSoundPoolManager SoundPoolManager;
+		[SerializeField]
 		private AudioSource AudioSource;
-		
-		private enum AdvancedLoopState
-		{
-			None,
-			Start,
-			Loop,
-			End
-		}
 
 		private Action OnFinished;
-		private bool Configured;
-		private float BaseVolume = 1f;
-		private float FadeStartVolume;
-		private float FadeTarget;
-		private float FadeDuration;
-		private float FadeElapsed;
-		
-		private AudioClip LoopClip;
-		private AudioClip EndClip;
-		private bool StopRequested;
-		private AdvancedLoopState LoopState;
 
-		public LinkedListNode<INOSoundInstance> Node { get; private set; }
-		public NOSoundClip Owner { get; private set; }
-		public bool IsActive => Configured;
+		private NOSoundClip Clip;
+		private LinkedListNode<INOSoundInstance> Node;
+
+		private NOSoundFadeHandler FadeHandler;
+		
+		private bool Configured;
+		private bool StopRequested;
+
+		private float FadeInDuration => Clip.Asset.DefaultFadeIn;
+		private float FadeOutDuration => Clip.Asset.DefaultFadeOut;
+
+		private float TimeToEnd => AudioSource.clip.length - AudioSource.time;
 
 		public void Initialize()
 		{
 			AudioSource ??= GetComponent<AudioSource>();
 			AudioSource.playOnAwake = false;
+
+			FadeHandler = new NOSoundFadeHandler(SetAudioSourceVolume);
 		}
 
-		public void Setup(NOSoundClip owner, LinkedListNode<INOSoundInstance> node)
+		public INOSoundInstance AssignClip(NOSoundClip clip)
 		{
-			Owner = owner;
-			Node = node;
+			Clip = clip;
+			Node = Clip.Register(this);
+			Configure(clip.Asset);
+			return this as INOSoundInstance;
 		}
-
-		public void ClearRegistration()
+		
+		public void Reset()
 		{
-			Owner = null;
-			Node = null;
+			FinishPlay();
+			Configure(Clip.Asset);
 		}
 
-		public void Play(NOSoundClipData data, NOSoundPlaybackOptions options, Action onFinished)
-		{
-			if (data == null)
-				return;
-
-			ConfigureCommon(data, options, onFinished);
-			if (data.HasAdvancedLoop)
-				ConfigureAdvancedLoop(data);
-			else
-				ConfigureSimple(data);
-
-			Configured = true;
-			AudioSource.Play();
-			BeginFadeTo(BaseVolume, options?.FadeInDuration ?? data.DefaultFadeIn, setVolumeToZero: true);
-		}
-
-		private void ConfigureCommon(NOSoundClipData data, NOSoundPlaybackOptions options, Action onFinished)
+		private void Configure(NOSoundClipData data)
 		{
 			AudioSource.priority = data.Priority;
 			AudioSource.outputAudioMixerGroup = data.MixerGroup;
 
-			var resolvedVolume = options?.Volume ?? data.ResolveVolume();
-			var resolvedPitch = options?.Pitch ?? data.ResolvePitch();
-			BaseVolume = Mathf.Clamp01(resolvedVolume);
-			AudioSource.volume = BaseVolume;
-			AudioSource.pitch = Mathf.Clamp(resolvedPitch, -3f, 3f);
+			AudioSource.clip = data.GetClip();
+			AudioSource.volume = data.ResolveVolume();
+			AudioSource.pitch = data.ResolvePitch();
+			
+			AudioSource.loop = data.Loop;
 			AudioSource.panStereo = data.StereoPan;
 			AudioSource.spatialBlend = data.SpatialBlend;
 			AudioSource.reverbZoneMix = data.ReverbZoneMix;
@@ -89,113 +69,18 @@ namespace NiqonNO.Core.Audio.World
 			AudioSource.minDistance = data.MinDistance;
 			AudioSource.maxDistance = data.MaxDistance;
 
-			if (options?.WorldPosition is { } worldPosition)
-				transform.position = worldPosition;
-
-			OnFinished = onFinished;
+			FadeHandler.Finish();
 			StopRequested = false;
-			LoopState = AdvancedLoopState.None;
-			FadeDuration = 0f;
-			FadeElapsed = 0f;
+			Configured = true;
 		}
 
-		private void ConfigureSimple(NOSoundClipData data)
-		{
-			AudioSource.clip = data.GetClip();
-			AudioSource.loop = data.Loop;
-			LoopClip = null;
-			EndClip = null;
-		}
-		
-		private void ConfigureAdvancedLoop(NOSoundClipData data)
-		{			
-			LoopClip = data.GetClip();
-			EndClip = data.EndClip;
-
-			if (data.StartClip != null)
-			{
-				AudioSource.clip = data.StartClip;
-				AudioSource.loop = false;
-				LoopState = AdvancedLoopState.Start;
-				return;
-			}
-
-			if (LoopClip != null)
-			{
-				AudioSource.clip = LoopClip;
-				AudioSource.loop = true;
-				LoopState = AdvancedLoopState.Loop;
-				return;
-			}
-
-			AudioSource.clip = EndClip;
-			AudioSource.loop = false;
-			LoopState = AdvancedLoopState.End;
-		}
-
-		public void Stop(float fadeOutDuration = 0f, bool graceful = true)
+		public void Play(Action onFinished = null)
 		{
 			if (!Configured)
 				return;
 
-			if (graceful && EndClip != null)
-			{
-				StopRequested = true;
-				if (LoopState == AdvancedLoopState.Loop)
-					return;
-			}
-
-			if (fadeOutDuration > 0f)
-			{
-				BeginFadeTo(0f, fadeOutDuration);
-				return;
-			}
-
-			AudioSource.Stop();
-			FinalizeStop();
-		}
-
-		public void ForceStop()
-		{
-			if (!Configured)
-				return;
-
-			AudioSource.Stop();
-			FinalizeStop();
-		}
-
-		public void SetPitch(float pitch)
-		{
-			if (!Configured)
-				return;
-			AudioSource.pitch = Mathf.Clamp(pitch, -3f, 3f);
-		}
-
-		public void SetVolume(float volume)
-		{
-			if (!Configured)
-				return;
-			BaseVolume = Mathf.Clamp01(volume);
-			if (FadeDuration <= 0f)
-				AudioSource.volume = BaseVolume;
-		}
-
-		private void BeginFadeTo(float targetVolume, float duration, bool setVolumeToZero = false)
-		{
-			if (duration <= 0f)
-			{
-				AudioSource.volume = targetVolume;
-				FadeDuration = 0f;
-				FadeElapsed = 0f;
-				return;
-			}
-
-			if (setVolumeToZero)
-				AudioSource.volume = 0f;
-			FadeStartVolume = AudioSource.volume;
-			FadeTarget = targetVolume;
-			FadeDuration = duration;
-			FadeElapsed = 0f;
+			FadeHandler.BeginFadeIn(AudioSource.volume, FadeInDuration);
+			AudioSource.Play();
 		}
 
 		private void Update()
@@ -203,87 +88,83 @@ namespace NiqonNO.Core.Audio.World
 			if (!Configured)
 				return;
 
-			TickFade();
+			FadeHandler.TickFade(Time.deltaTime);
 
-			if (AudioSource.isPlaying)
-				return;
-
-			if (TryAdvanceAdvancedLoop())
-				return;
-
-			FinalizeStop();
-		}
-
-		private void TickFade()
-		{
-			if (FadeDuration <= 0f)
-				return;
-
-			FadeElapsed += Time.deltaTime;
-			var normalizedTime = Mathf.Clamp01(FadeElapsed / FadeDuration);
-			AudioSource.volume = Mathf.Lerp(FadeStartVolume, FadeTarget, normalizedTime);
-
-			if (normalizedTime < 1f)
-				return;
-
-			FadeDuration = 0f;
-			FadeElapsed = 0f;
-			if (!Mathf.Approximately(FadeTarget, 0f))
-				return;
-
-			AudioSource.Stop();
-			FinalizeStop();
-		}
-
-		private bool TryAdvanceAdvancedLoop()
-		{
-			if (LoopState == AdvancedLoopState.None)
-				return false;
-
-			switch (LoopState)
+			if (StopRequested)
 			{
-				case AdvancedLoopState.Start when StopRequested && EndClip != null:
-					AudioSource.clip = EndClip;
-					AudioSource.loop = false;
-					LoopState = AdvancedLoopState.End;
-					AudioSource.Play();
-					return true;
-				case AdvancedLoopState.Start when LoopClip != null:
-					AudioSource.clip = LoopClip;
-					AudioSource.loop = true;
-					LoopState = AdvancedLoopState.Loop;
-					AudioSource.Play();
-					return true;
-				case AdvancedLoopState.Start when EndClip != null:
-					AudioSource.clip = EndClip;
-					AudioSource.loop = false;
-					LoopState = AdvancedLoopState.End;
-					AudioSource.Play();
-					return true;
-				case AdvancedLoopState.Loop when StopRequested && EndClip != null:
-					AudioSource.clip = EndClip;
-					AudioSource.loop = false;
-					LoopState = AdvancedLoopState.End;
-					AudioSource.Play();
-					return true;
+				if (FadeHandler.IsDone)
+				{
+					FinishPlay();
+					Unregister();
+				}
+				return;
 			}
 
-			return false;
+			if (AudioSource.loop) return;
+			if (TimeToEnd > FadeOutDuration) return;
+			Stop();
 		}
 
-		private void FinalizeStop()
+		public void Stop()
 		{
+			if (!Configured)
+				return;
+
+			StopRequested = true;
+			FadeHandler.BeginFadeOut(AudioSource.volume, FadeOutDuration);
+		}
+
+		public void ForceStop()
+		{
+			if (!Configured)
+				return;
+			
+			FinishPlay();
+			Unregister();
+		}
+		
+		private void FinishPlay()
+		{
+			FadeHandler.Finish();
+			AudioSource.Stop();
 			OnFinished?.Invoke();
 			OnFinished = null;
 			Configured = false;
-			LoopClip = null;
-			EndClip = null;
-			LoopState = AdvancedLoopState.None;
-			FadeDuration = 0f;
-			FadeElapsed = 0f;
-			
-			Owner.Unregister(this);
+		}
+		private void Unregister()
+		{
+			Clip.Unregister(Node);
+			Node = null;
+			Clip = null;
+			SoundPoolManager.Return(this as INOSoundInstance);
 		}
 
+		public void SetPitch(float pitch)
+		{
+			if (!Configured)
+				return;
+			
+			AudioSource.pitch = Mathf.Clamp(pitch, -3f, 3f);
+		}
+
+		public void SetVolume(float volume)
+		{
+			if (!Configured)
+				return;
+			
+			if(FadeHandler.IsDone)
+			{
+				SetAudioSourceVolume(volume);
+				return;
+			}
+
+			if (StopRequested) return;
+			FadeHandler.UpdateTargetVolume(volume);
+		}
+
+		private void SetAudioSourceVolume(float volume)
+		{
+			AudioSource.volume = Mathf.Clamp01(volume);
+		}
 	}
 }

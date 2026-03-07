@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Linq;
+using NiqonNO.Core.Audio.Logic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -9,10 +9,7 @@ namespace NiqonNO.Core.Audio.World
     {
         private const int InitialPoolSize = 32;
         private readonly Queue<NOSoundEmitter> EmitterPool = new(InitialPoolSize);
-        private readonly HashSet<NOSoundEmitter> ActiveEmitters = new(InitialPoolSize);
-
-        [SerializeField, Min(1)]
-        private int MaxEmitters = InitialPoolSize;
+        private readonly Dictionary<INOSoundInstance, NOSoundEmitter> ActiveEmitters = new(InitialPoolSize);
 
         [SerializeField, SceneObjectsOnly]
         private NOSoundEmitter EmitterTemplate;
@@ -24,9 +21,9 @@ namespace NiqonNO.Core.Audio.World
 
         public override void Dispose()
         {
-            while (ActiveEmitters.Count > 0)
+            List<NOSoundEmitter> emitters = new List<NOSoundEmitter>(ActiveEmitters.Values);
+            foreach(var emitter in emitters)
             {
-                var emitter = ActiveEmitters.First();
                 emitter.ForceStop();
             }
             EmitterPool.Clear();
@@ -34,8 +31,7 @@ namespace NiqonNO.Core.Audio.World
 
         private void InitializePool()
         {
-            var poolSize = Mathf.Min(InitialPoolSize, MaxEmitters);
-            for (var i = 1; i < poolSize; i++)
+            for (var i = 1; i < InitialPoolSize; i++)
                 EmitterPool.Enqueue(CreateEmitter());
 
             EmitterTemplate.Initialize();
@@ -51,28 +47,35 @@ namespace NiqonNO.Core.Audio.World
             return emitter;
         }
 
-        public NOSoundEmitter AcquireAvailable()
+        public INOSoundInstance AssignToEmitter(NOSoundClip clip)
         {
-            NOSoundEmitter emitter = null;
-            if (EmitterPool.TryDequeue(out var pooledEmitter))
-                emitter = pooledEmitter;
-            else if (ActiveEmitters.Count < MaxEmitters)
-                emitter = CreateEmitter();
-
+            NOSoundEmitter emitter;
+            INOSoundInstance instance;
+            if (clip.MaxPlaying)
+            {
+                instance = clip.GetOldestInstance();
+                ActiveEmitters.TryGetValue(instance, out emitter);
+                if (emitter == null)
+                    return null;
+                emitter.Reset();
+                return instance;
+            }
+            
+            EmitterPool.TryDequeue(out emitter);
             if (emitter == null)
                 return null;
-
+            instance = emitter.AssignClip(clip);
+            ActiveEmitters.Add(instance, emitter);
             emitter.gameObject.SetActive(true);
-            ActiveEmitters.Add(emitter);
-            return emitter;
+            return instance;
         }
 
-        public void Return(NOSoundEmitter emitter)
+        public void Return(INOSoundInstance instance)
         {
-            if (!ActiveEmitters.Remove(emitter))
-                return;
+            if (!ActiveEmitters.TryGetValue(instance, out var emitter)) return;
 
             emitter.gameObject.SetActive(false);
+            ActiveEmitters.Remove(instance);
             EmitterPool.Enqueue(emitter);
         }
     }

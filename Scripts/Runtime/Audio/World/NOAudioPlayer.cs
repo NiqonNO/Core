@@ -1,5 +1,4 @@
 using NiqonNO.Core.Audio.Logic;
-using UnityEngine;
 
 namespace NiqonNO.Core.Audio.World
 {
@@ -8,8 +7,8 @@ namespace NiqonNO.Core.Audio.World
 		[NOInject] private INOAudioService AudioManager;
 		[NOInject] private INOSoundEmitterPoolService EmitterPool;
 		
-		[SerializeField]
-		private NOSoundPlaybackOptions Options;
+		/*[SerializeField]
+		private NOSoundPlaybackOptions Options;*/
 		
 		private INOSoundInstance TrackedInstance;
 		
@@ -25,20 +24,18 @@ namespace NiqonNO.Core.Audio.World
 				return;
 			
 			var clip = AudioManager.GetClip(clipData);
-			var emitter = clip.MaxPlaying ? clip.StealOldestInstance() as NOSoundEmitter : EmitterPool.AcquireAvailable();
-			if (emitter == null)
-				return;
-			
-			clip.Register(emitter);
-			emitter.Play(clipData, Options, ReleaseTracked);
+			var soundInstance = EmitterPool.AssignToEmitter(clip);
 
 			if (!track)
+			{
+				soundInstance.Play();
 				return;
+			}
 
-			if (TrackedInstance != null && TrackedInstance != emitter)
+			if (TrackedInstance != null && TrackedInstance != soundInstance)
 				TrackedInstance.Stop();
-			TrackedInstance = emitter;
-
+			TrackedInstance = soundInstance;
+			soundInstance.Play(ReleaseTracked);
 		}
 
 		void ReleaseTracked()
@@ -52,7 +49,7 @@ namespace NiqonNO.Core.Audio.World
 				return;
 
 			TrackedInstance.Stop();
-			TrackedInstance = null;
+			ReleaseTracked();
 		}
 
 		public void StopAll(NOSoundClipData clipData)

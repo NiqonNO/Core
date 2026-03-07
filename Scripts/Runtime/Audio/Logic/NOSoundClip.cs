@@ -10,28 +10,25 @@ namespace NiqonNO.Core.Audio.Logic
 		private bool IsPlaying => ActiveCount > 0;
 		public bool MaxPlaying => ActiveCount >= Asset.MaxInstances;
 
-		public INOSoundInstance StealOldestInstance()
+		public INOSoundInstance GetOldestInstance()
 		{
-			var instance = ActiveInstances.First.Value;
-			instance.ForceStop();
-			return instance;
+			var instance = ActiveInstances.First;
+			ActiveInstances.RemoveFirst();
+			ActiveInstances.AddLast(instance);
+			return instance.Value;
 		}
 
-		public void Register(INOSoundInstance instance)
+		public LinkedListNode<INOSoundInstance> Register(INOSoundInstance instance)
 		{
-			if (instance == null)
-				return;
-
-			instance.Setup(this, ActiveInstances.AddLast(instance));
+			return ActiveInstances.AddLast(instance);
 		}
 
-		public void Unregister(INOSoundInstance instance)
+		public void Unregister(LinkedListNode<INOSoundInstance> node)
 		{
-			if (instance?.Node == null)
+			if (node == null)
 				return;
 
-			ActiveInstances.Remove(instance.Node);
-			instance.ClearRegistration();
+			ActiveInstances.Remove(node);
 		}
 
 		public void Dispose()

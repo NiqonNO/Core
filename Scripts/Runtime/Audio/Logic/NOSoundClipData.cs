@@ -57,13 +57,6 @@ namespace NiqonNO.Core.Audio.Logic
 		[field: SerializeField, Min(0f)]
 		public float DefaultFadeOut { get; private set; } = 0f;
 
-		[field: SerializeField, ShowIf(nameof(Loop)), BoxGroup("Advanced Loop")]
-		public AudioClip StartClip { get; private set; }
-
-		[field: SerializeField, ShowIf(nameof(Loop)), BoxGroup("Advanced Loop")]
-		public AudioClip EndClip { get; private set; }
-		public bool HasAdvancedLoop => Loop && (StartClip != null || EndClip != null);
-
 		[SerializeField]
 		private AudioClip[] Clips;
 		public AudioClip GetClip() => Clips.Length == 0 ? null : Clips[Random.Range(0, Clips.Length)];

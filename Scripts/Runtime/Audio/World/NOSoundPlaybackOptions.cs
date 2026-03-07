@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace NiqonNO.Core.Audio
+namespace NiqonNO.Core.Audio.World
 {
 	[Serializable]
 	public class NOSoundPlaybackOptions

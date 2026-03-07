@@ -1,10 +1,10 @@
+using NiqonNO.Core.Audio.Logic;
+
 namespace NiqonNO.Core.Audio.World
 {
 	public interface INOSoundEmitterPoolService : INOService
 	{
-		NOSoundEmitter AcquireAvailable();
-		void Return(NOSoundEmitter emitter);
-
-
+		INOSoundInstance AssignToEmitter(NOSoundClip clip);
+		void Return(INOSoundInstance instance);
 	}
 }
