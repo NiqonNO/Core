@@ -13,14 +13,14 @@ namespace NiqonNO.Core.Audio.World
 		[SerializeField]
 		private AudioSource AudioSource;
 
-		private Action OnFinished;
+		private Action<INOSoundInstance> OnFinished;
 
 		private NOSoundClip Clip;
 		private LinkedListNode<INOSoundInstance> Node;
 
 		private NOSoundFadeHandler FadeHandler;
 		
-		private bool Configured;
+		private bool Plying;
 		private bool StopRequested;
 
 		private float FadeInDuration => Clip.Asset.DefaultFadeIn;
@@ -71,21 +71,21 @@ namespace NiqonNO.Core.Audio.World
 
 			FadeHandler.Finish();
 			StopRequested = false;
-			Configured = true;
 		}
 
-		public void Play(Action onFinished = null)
+		public void Play(Action<INOSoundInstance> onFinished = null)
 		{
-			if (!Configured)
-				return;
-
+			if (Clip == null) return;
+			
+			OnFinished = onFinished;
 			FadeHandler.BeginFadeIn(AudioSource.volume, FadeInDuration);
 			AudioSource.Play();
+			Plying = true;
 		}
 
 		private void Update()
 		{
-			if (!Configured)
+			if (!Plying)
 				return;
 
 			FadeHandler.TickFade(Time.deltaTime);
@@ -101,13 +101,14 @@ namespace NiqonNO.Core.Audio.World
 			}
 
 			if (AudioSource.loop) return;
-			if (TimeToEnd > FadeOutDuration) return;
-			Stop();
+			if (TimeToEnd <= FadeOutDuration || 
+			    !AudioSource.isPlaying)
+				Stop();
 		}
 
 		public void Stop()
 		{
-			if (!Configured)
+			if (!Plying)
 				return;
 
 			StopRequested = true;
@@ -116,7 +117,7 @@ namespace NiqonNO.Core.Audio.World
 
 		public void ForceStop()
 		{
-			if (!Configured)
+			if (!Plying)
 				return;
 			
 			FinishPlay();
@@ -127,9 +128,9 @@ namespace NiqonNO.Core.Audio.World
 		{
 			FadeHandler.Finish();
 			AudioSource.Stop();
-			OnFinished?.Invoke();
+			OnFinished?.Invoke(this);
 			OnFinished = null;
-			Configured = false;
+			Plying = false;
 		}
 		private void Unregister()
 		{
@@ -141,17 +142,11 @@ namespace NiqonNO.Core.Audio.World
 
 		public void SetPitch(float pitch)
 		{
-			if (!Configured)
-				return;
-			
 			AudioSource.pitch = Mathf.Clamp(pitch, -3f, 3f);
 		}
 
 		public void SetVolume(float volume)
 		{
-			if (!Configured)
-				return;
-			
 			if(FadeHandler.IsDone)
 			{
 				SetAudioSourceVolume(volume);

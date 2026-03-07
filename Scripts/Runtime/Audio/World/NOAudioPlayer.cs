@@ -20,12 +20,11 @@ namespace NiqonNO.Core.Audio.World
 		public void PlayTracked(NOSoundClipData clipData) => Play(clipData, true);
 		private void Play(NOSoundClipData clipData, bool track)
 		{
-			if (clipData == null)
-				return;
-			
+			if (clipData == null) return;
 			var clip = AudioManager.GetClip(clipData);
 			var soundInstance = EmitterPool.AssignToEmitter(clip);
-
+			if (soundInstance == null) return;
+			
 			if (!track)
 			{
 				soundInstance.Play();
@@ -38,8 +37,9 @@ namespace NiqonNO.Core.Audio.World
 			soundInstance.Play(ReleaseTracked);
 		}
 
-		void ReleaseTracked()
+		void ReleaseTracked(INOSoundInstance instance)
 		{
+			if (instance != TrackedInstance) return;
 			TrackedInstance = null;
 		}
 
@@ -49,7 +49,6 @@ namespace NiqonNO.Core.Audio.World
 				return;
 
 			TrackedInstance.Stop();
-			ReleaseTracked();
 		}
 
 		public void StopAll(NOSoundClipData clipData)

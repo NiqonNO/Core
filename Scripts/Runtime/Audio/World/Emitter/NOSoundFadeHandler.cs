@@ -44,7 +44,7 @@ namespace NiqonNO.Core.Audio.World
 		public void UpdateTargetVolume(float volume)
 		{
 			FadeTarget = volume;
-			FadeDuration = 1 - FadeElapsed;
+			FadeDuration *= 1 - FadeElapsed;
 			FadeElapsed = 0;
 		}
 		

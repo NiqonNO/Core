@@ -4,7 +4,7 @@ namespace NiqonNO.Core.Audio.Logic
 {
 	public interface INOSoundInstance
 	{
-		void Play(Action onFinished = null);
+		void Play(Action<INOSoundInstance> onFinished = null);
 		void Stop();
 		void ForceStop();
 		void SetPitch(float pitch);
