@@ -20,7 +20,7 @@ namespace NiqonNO.Core.Audio.World
 
 		private NOSoundFadeHandler FadeHandler;
 		
-		private bool Plying;
+		private bool Playing;
 		private bool StopRequested;
 
 		private float FadeInDuration => Clip.Asset.DefaultFadeIn;
@@ -71,6 +71,7 @@ namespace NiqonNO.Core.Audio.World
 
 			FadeHandler.Finish();
 			StopRequested = false;
+			Playing = false;
 		}
 
 		public void Play(Action<INOSoundInstance> onFinished = null)
@@ -80,12 +81,12 @@ namespace NiqonNO.Core.Audio.World
 			OnFinished = onFinished;
 			FadeHandler.BeginFadeIn(AudioSource.volume, FadeInDuration);
 			AudioSource.Play();
-			Plying = true;
+			Playing = true;
 		}
 
 		private void Update()
 		{
-			if (!Plying)
+			if (!Playing)
 				return;
 
 			FadeHandler.TickFade(Time.deltaTime);
@@ -108,7 +109,7 @@ namespace NiqonNO.Core.Audio.World
 
 		public void Stop()
 		{
-			if (!Plying)
+			if (!Playing)
 				return;
 
 			StopRequested = true;
@@ -117,7 +118,7 @@ namespace NiqonNO.Core.Audio.World
 
 		public void ForceStop()
 		{
-			if (!Plying)
+			if (Clip == null)
 				return;
 			
 			FinishPlay();
@@ -130,7 +131,7 @@ namespace NiqonNO.Core.Audio.World
 			AudioSource.Stop();
 			OnFinished?.Invoke(this);
 			OnFinished = null;
-			Plying = false;
+			Playing = false;
 		}
 		private void Unregister()
 		{

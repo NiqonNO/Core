@@ -43,8 +43,12 @@ namespace NiqonNO.Core.Audio.World
 		}
 		public void UpdateTargetVolume(float volume)
 		{
+			var normalizedTime = FadeDuration <= 0f ? 1f : Mathf.Clamp01(FadeElapsed / FadeDuration);
+			var easedTime = Ease.Ease(normalizedTime);
+			FadeInitial = Mathf.Lerp(FadeInitial, FadeTarget, easedTime);
 			FadeTarget = volume;
-			FadeDuration *= 1 - FadeElapsed;
+			FadeDuration = Mathf.Max(0f, FadeDuration - FadeElapsed);
+
 			FadeElapsed = 0;
 		}
 		
