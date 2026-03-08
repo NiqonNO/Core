@@ -1,8 +1,11 @@
-﻿namespace NiqonNO.Core
+﻿using System;
+
+namespace NiqonNO.Core
 {
     public abstract class NOInitializableMonoBehaviour : NOMonoBehaviour, IInitializable
     {
         protected bool Initialized { get; private set; }
+        protected event Action OnGameReadyEvent;
 
         private void Awake()
         {
@@ -12,12 +15,8 @@
         public void Initialize()
         {
             Initialized = true;
-            OnGameReady();
-        }
-
-        protected virtual void OnGameReady()
-        {
-            
+            OnGameReadyEvent?.Invoke();
+            OnGameReadyEvent = null;
         }
     }
 }
