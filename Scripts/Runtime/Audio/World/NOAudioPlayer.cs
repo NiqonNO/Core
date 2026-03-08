@@ -11,10 +11,6 @@ namespace NiqonNO.Core.Audio.World
 		private NOSoundPlaybackOptions Options;*/
 		
 		private INOSoundInstance TrackedInstance;
-		
-		public override void Initialize()
-		{
-		}
 
 		public void Play(NOSoundClipData clipData) => Play(clipData, false);
 		public void PlayTracked(NOSoundClipData clipData) => Play(clipData, true);
