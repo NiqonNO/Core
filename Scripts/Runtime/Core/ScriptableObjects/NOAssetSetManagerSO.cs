@@ -8,7 +8,7 @@ namespace NiqonNO.Core
 		where TDataState : NODataState<TData> 
 		where TRuntimeState : NOAssetManagerState<TData, TDataState>
 	{
-		[ReadOnly, ShowInInspector, PropertyOrder(float.MinValue)]
+		[ShowInInspector, PropertyOrder(float.MinValue)]
 		protected TDataSet AssetSet { get; private set; }
 		
 		public override void Initialize()

@@ -10,8 +10,8 @@ namespace NiqonNO.Core
         public NOManagerSO[] ScriptableObjectManagers { get; private set; }
         IEnumerable<NOManagerSO> INOContext<NOManagerSO>.Managers => ScriptableObjectManagers;
 
-        public NOContainer Container { get; set;  }
-        public NOFactory Factory { get; set;  }
+        public NOContainer Container { get; private set;  }
+        public NOFactory Factory { get; private set;  }
 
         public void InitializeContext()
         {

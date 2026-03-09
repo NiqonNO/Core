@@ -109,9 +109,11 @@ namespace NiqonNO.Core.Scene
                 context.InitializeContext();
                 break;
             }
-
+            
             LoadedScenes[scene] = context;
-            if (scene.name.Equals(MainScene)) SceneManager.SetActiveScene(scene);
+            
+            if (context != null && context.MainScene)
+                SceneManager.SetActiveScene(scene);
         }
         
         private void DisposeSceneContext(UnityEngine.SceneManagement.Scene scene)
