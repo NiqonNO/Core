@@ -7,7 +7,7 @@ namespace NiqonNO.Core
         protected bool Initialized { get; private set; }
         protected event Action OnGameReadyEvent;
 
-        private void Awake()
+        protected virtual void Awake()
         {
             NOContainer.EnqueueForInitialization(gameObject.scene.name, this);
         }
