@@ -1,4 +1,5 @@
 using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace NiqonNO.Core
 {
@@ -8,7 +9,7 @@ namespace NiqonNO.Core
 		where TDataState : NODataState<TData> 
 		where TRuntimeState : NOAssetManagerState<TData, TDataState>
 	{
-		[ShowInInspector, PropertyOrder(float.MinValue)]
+		[field: SerializeField, PropertyOrder(float.MinValue)]
 		protected TDataSet AssetSet { get; private set; }
 		
 		public override void Initialize()
