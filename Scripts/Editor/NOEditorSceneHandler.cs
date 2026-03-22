@@ -21,7 +21,7 @@ namespace NiqonNO.Core.Editor
 
         private static void OnSceneListChanged()
         {
-            NOSceneDependencyData.ValidateData();
+            NOSceneDependencyData.UpdateSceneList();
         }
         
         private static void OnPlayModeStateChanged(PlayModeStateChange stateChange)

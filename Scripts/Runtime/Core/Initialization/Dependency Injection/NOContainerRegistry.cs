@@ -59,7 +59,7 @@ namespace NiqonNO.Core
             list.Add(initializable);
         }
 
-        private static void InitializeInitializable(NOContainer container, IInitializable initializable)
+        private void InitializeInitializable(NOContainer container, IInitializable initializable)
         {
             container.Inject(initializable);
             initializable.Initialize();
