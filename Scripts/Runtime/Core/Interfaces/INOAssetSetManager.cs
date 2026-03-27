@@ -14,7 +14,7 @@ namespace NiqonNO.Core
 			return CreateDataState(data);
 		}
 
-		protected TDataState CreateDataState(TData data)
+		public TDataState CreateDataState(TData data)
 		{
 			TDataState clipState = Context.Factory.CreateAsset<TDataState>();
 			clipState.Initialize(data);
