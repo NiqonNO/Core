@@ -17,7 +17,7 @@ namespace NiqonNO.Core.Audio.World
 		private void Play(NOSoundClipData clipData, bool track)
 		{
 			if (clipData == null) return;
-			var clip = AudioManager.GetState(clipData);
+			var clip = AudioManager.GetSoundClip(clipData);
 			var soundInstance = EmitterPool.AssignToEmitter(clip);
 			if (soundInstance == null) return;
 			
