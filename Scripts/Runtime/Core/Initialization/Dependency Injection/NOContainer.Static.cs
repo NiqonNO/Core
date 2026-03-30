@@ -16,7 +16,7 @@ namespace NiqonNO.Core
 			FieldCache.Clear();
 		}
 		
-		public static void EnqueueForInitialization(string scope, IInitializable initializable) => Registry.EnqueueForInitialization(scope, initializable);
+		public static void EnqueueForInitialization(string scope, INOInitializable initializable) => Registry.EnqueueForInitialization(scope, initializable);
 		
 		private static FieldInfo[] GetInjectableFields(Type type)
 		{

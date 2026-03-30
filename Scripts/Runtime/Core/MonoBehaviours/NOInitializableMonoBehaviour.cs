@@ -2,7 +2,7 @@
 
 namespace NiqonNO.Core
 {
-    public abstract class NOInitializableMonoBehaviour : NOMonoBehaviour, IInitializable
+    public abstract class NOInitializableMonoBehaviour : NOMonoBehaviour, INOInitializable
     {
         protected bool Initialized { get; private set; }
         protected event Action OnGameReadyEvent;

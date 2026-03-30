@@ -1,6 +1,6 @@
 namespace NiqonNO.Core
 {
-	public interface IInitializable
+	public interface INOInitializable
 	{
 		void Initialize();
 	}

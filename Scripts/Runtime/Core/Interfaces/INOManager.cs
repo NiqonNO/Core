@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace NiqonNO.Core
 {
-    public interface INOManager : IInitializable
+    public interface INOManager : INOInitializable
     {
         //void Initialize();
         void Dispose();

@@ -6,7 +6,7 @@ namespace NiqonNO.Core
 	public class NOContainerRegistry
 	{
 		private readonly Dictionary<string, NOContainer> ContainersByScope = new();
-        private readonly Dictionary<string, List<IInitializable>> WaitingForInitialization = new();
+        private readonly Dictionary<string, List<INOInitializable>> WaitingForInitialization = new();
 
         public void ResetState()
         {
@@ -40,7 +40,7 @@ namespace NiqonNO.Core
             ContainersByScope.Remove(container.MyScope);
         }
 
-        public void EnqueueForInitialization(string scope, IInitializable initializable)
+        public void EnqueueForInitialization(string scope, INOInitializable initializable)
         {
             if (initializable == null) return;
             scope ??= string.Empty;
@@ -53,13 +53,13 @@ namespace NiqonNO.Core
 
             if (!WaitingForInitialization.TryGetValue(scope, out var list))
             {
-                list = new List<IInitializable>();
+                list = new List<INOInitializable>();
                 WaitingForInitialization[scope] = list;
             }
             list.Add(initializable);
         }
 
-        private void InitializeInitializable(NOContainer container, IInitializable initializable)
+        private void InitializeInitializable(NOContainer container, INOInitializable initializable)
         {
             container.Inject(initializable);
             initializable.Initialize();
