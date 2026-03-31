@@ -22,7 +22,8 @@ namespace NiqonNO.Core.Editor.Windows
                 !typeof(UnityEditor.Editor).IsAssignableFrom(t))
            .ToHashSet();
 
-        [MenuItem("Assets/Create Scriptable Object", priority = -1000)]
+        [MenuItem("Assets/Create/Scriptable Object", priority = -1000)]
+        [MenuItem("Tools/Niqon/Create Scriptable Object")]
         private static void ShowDialog()
         {
             var path = "Assets";
