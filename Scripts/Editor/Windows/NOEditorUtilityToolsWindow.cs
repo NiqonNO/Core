@@ -21,7 +21,7 @@ namespace NiqonNO.Core.Editor
             var tabs = TypeCache.GetTypesDerivedFrom<NOEditorUtilityToolTab>()
                 .Where(type => !type.IsAbstract && !type.ContainsGenericParameters && type.GetConstructor(Type.EmptyTypes) != null)
                 .Select(type => (NOEditorUtilityToolTab)Activator.CreateInstance(type))
-                .OrderBy(tab => tab.Order)
+                .OrderByDescending(tab => tab.Order)
                 .ThenBy(tab => tab.TabName)
                 .ToList();
             
