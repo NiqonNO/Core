@@ -54,7 +54,7 @@ namespace NiqonNO.Core.Editor
 
         void ClearCurrentTab()
         {
-            CurrentTab.Dispose();
+            CurrentTab?.Dispose();
             CurrentTab = null;
         }
     }
