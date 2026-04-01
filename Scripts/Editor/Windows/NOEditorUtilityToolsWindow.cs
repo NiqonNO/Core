@@ -37,7 +37,9 @@ namespace NiqonNO.Core.Editor
         {
             var tab = MenuTree.Selection.Select(i => i.Value).FilterCast<NOEditorUtilityToolTab>().FirstOrDefault();
             if (tab == null) return;
+            ClearCurrentTab();
             CurrentTab = tab;
+            CurrentTab.Enable();
         }
 
         protected override void DrawEditor(int index) => CurrentTab?.DrawGUI();
@@ -52,6 +54,7 @@ namespace NiqonNO.Core.Editor
 
         void ClearCurrentTab()
         {
+            CurrentTab.Dispose();
             CurrentTab = null;
         }
     }

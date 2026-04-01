@@ -11,9 +11,19 @@ namespace NiqonNO.Core.Editor
 
 		public void DrawGUI()
 		{
-			Tree ??= PropertyTree.Create(this);
+			
 			Tree.UpdateTree();
 			Tree.Draw(false);
+		}
+
+		public void Enable()
+		{
+			Tree = PropertyTree.Create(this);
+		}
+		public void Dispose()
+		{
+			Tree.Dispose();
+			Tree = null;
 		}
 	}
 }
