@@ -5,55 +5,55 @@ using UnityEngine;
 namespace NiqonNO.Core
 {
 	[Serializable]
-	public struct Barycentric3
+	public struct Simplex3 : IEquatable<Simplex3>
 	{
-		private static readonly Vector2 TriangleLeftCorner = new(0.0f, 1.0f);
-		private static readonly Vector2 TriangleTopCorner = new(0.5f, 0.0f);
-		private static readonly Vector2 TriangleRightCorner = new(1.0f, 1.0f);
+		private static readonly Vector2 LeftCorner = new(0.0f, 1.0f);
+		private static readonly Vector2 TopCorner = new(0.5f, 0.0f);
+		private static readonly Vector2 RightCorner = new(1.0f, 1.0f);
 		
 		public const float Sum = 1f;
 		
-		public static readonly Barycentric3 Identity = new(Sum / 3f, Sum / 3f, Sum / 3f);
-		public static readonly Barycentric3 Left = new(Sum, 0f, 0f);
-		public static readonly Barycentric3 Top = new(0f, Sum, 0f);
-		public static readonly Barycentric3 Right = new(0f, 0f, Sum);
+		public static readonly Simplex3 Identity = new(Sum / 3f, Sum / 3f, Sum / 3f);
+		public static readonly Simplex3 Left = new(Sum, 0f, 0f);
+		public static readonly Simplex3 Top = new(0f, Sum, 0f);
+		public static readonly Simplex3 Right = new(0f, 0f, Sum);
 
 		public readonly float X;
 		public readonly float Y;
 		public readonly float Z;
 		
-		public Barycentric3(float x, float y, float z)
+		public Simplex3(float x, float y, float z)
 		{
 			X = x;
 			Y = y;
 			Z = z;
 		}
-		public static Barycentric3 FromX(float x)
+		public static Simplex3 FromX(float x)
 		{
 			var remaining = (Sum - x) * 0.5f;
-			return new Barycentric3(x, remaining, remaining);
+			return new Simplex3(x, remaining, remaining);
 		}
-		public static Barycentric3 FromY(float y)
+		public static Simplex3 FromY(float y)
 		{
 			var remaining = (Sum - y) * 0.5f;
-			return new Barycentric3(remaining, y, remaining);
+			return new Simplex3(remaining, y, remaining);
 		}
-		public static Barycentric3 FromZ(float z)
+		public static Simplex3 FromZ(float z)
 		{
 			var remaining = (Sum - z) * 0.5f;
-			return new Barycentric3(remaining, remaining, z);
+			return new Simplex3(remaining, remaining, z);
 		}
-		public static Barycentric3 FromXY(float x, float y)
+		public static Simplex3 FromXY(float x, float y)
 		{
-			return new Barycentric3(x, y, Sum - x - y);
+			return new Simplex3(x, y, Sum - x - y);
 		}
-		public static Barycentric3 FromXZ(float x, float z)
+		public static Simplex3 FromXZ(float x, float z)
 		{
-			return new Barycentric3(x, Sum - x - z, z);
+			return new Simplex3(x, Sum - x - z, z);
 		}
-		public static Barycentric3 FromYZ(float y, float z)
+		public static Simplex3 FromYZ(float y, float z)
 		{
-			return new Barycentric3(Sum - y - z, y, z);
+			return new Simplex3(Sum - y - z, y, z);
 		}
 
 		public Vector3 ToVector3()
@@ -61,9 +61,9 @@ namespace NiqonNO.Core
 			return new Vector3(X, Y, Z);
 		}
 
-		public static Barycentric3 FromVector3(Vector3 v)
+		public static Simplex3 FromVector3(Vector3 v)
 		{
-			return new Barycentric3(v.x, v.y, v.z);
+			return new Simplex3(v.x, v.y, v.z);
 		}
 
 		public override string ToString()
@@ -71,14 +71,14 @@ namespace NiqonNO.Core
 			return $"({X}, {Y}, {Z})";
 		}
 
-		public static implicit operator Vector3(Barycentric3 b)
+		public static implicit operator Vector3(Simplex3 b)
 		{
 			return new Vector3(b.X, b.Y, b.Z);
 		}
 		
-		public static Barycentric3 FromCoordinates(Vector2 coordinates) =>
-			FromCoordinates(coordinates, TriangleLeftCorner, TriangleTopCorner, TriangleRightCorner);
-		public static Barycentric3 FromCoordinates(Vector2 coordinates, Vector2 leftCorner, Vector2 topCorner, Vector2 rightCorner)
+		public static Simplex3 FromCoordinates(Vector2 coordinates) =>
+			FromCoordinates(coordinates, LeftCorner, TopCorner, RightCorner);
+		public static Simplex3 FromCoordinates(Vector2 coordinates, Vector2 leftCorner, Vector2 topCorner, Vector2 rightCorner)
 		{
 			var v0 = leftCorner - topCorner;
 			var v1 = rightCorner - topCorner;
@@ -100,7 +100,7 @@ namespace NiqonNO.Core
 				var t = Vector2.Dot(coordinates - topCorner, rightCorner - topCorner) /
 				        Vector2.Dot(rightCorner - topCorner, rightCorner - topCorner);
 				t = Mathf.Clamp01(t);
-				return Barycentric3.FromYZ(1.0f - t, t);
+				return FromYZ(1.0f - t, t);
 			}
 
 			if (y < 0)
@@ -108,7 +108,7 @@ namespace NiqonNO.Core
 				var t = Vector2.Dot(coordinates - rightCorner, leftCorner - rightCorner) /
 				        Vector2.Dot(leftCorner - rightCorner, leftCorner - rightCorner);
 				t = Mathf.Clamp01(t);
-				return Barycentric3.FromXZ(t, 1.0f - t);
+				return FromXZ(t, 1.0f - t);
 			}
 
 			if (z < 0)
@@ -116,14 +116,14 @@ namespace NiqonNO.Core
 				var t = Vector2.Dot(coordinates - leftCorner, topCorner - leftCorner) /
 				        Vector2.Dot(topCorner - leftCorner, topCorner - leftCorner);
 				t = Mathf.Clamp01(t);
-				return Barycentric3.FromXY(1.0f - t, t);
+				return FromXY(1.0f - t, t);
 			}
 
-			return new Barycentric3(x, y, z);
+			return new Simplex3(x, y, z);
 		}
-		public static Vector2 ToPosition(Barycentric3 value) =>
-			ToPosition(value, TriangleLeftCorner, TriangleTopCorner, TriangleRightCorner);
-		public static Vector2 ToPosition(Barycentric3 value, Vector2 leftCorner, Vector2 topCorner, Vector2 rightCorner)
+		public static Vector2 ToPosition(Simplex3 value) =>
+			ToPosition(value, LeftCorner, TopCorner, RightCorner);
+		public static Vector2 ToPosition(Simplex3 value, Vector2 leftCorner, Vector2 topCorner, Vector2 rightCorner)
 		{
 			return value.X * leftCorner +
 			       value.Y * topCorner +
@@ -140,7 +140,7 @@ namespace NiqonNO.Core
 				minValue, maxValue);
 		}
 		
-		public static Barycentric3 Clamp01(Vector3 barycentric, BarycentricConstraint constraint)
+		public static Simplex3 Clamp01(Vector3 barycentric, BarycentricConstraint constraint)
 		{
 			barycentric.x = Mathf.Clamp01(barycentric.x);
 			barycentric.y = Mathf.Clamp01(barycentric.y);
@@ -152,10 +152,10 @@ namespace NiqonNO.Core
 				BarycentricConstraint.X => ClampConstrained(0),
 				BarycentricConstraint.Y => ClampConstrained(1),
 				BarycentricConstraint.Z => ClampConstrained(2),
-				_ => currentSum == 0 ? Barycentric3.Identity : Barycentric3.FromVector3(barycentric / currentSum)
+				_ => currentSum == 0 ? Identity : FromVector3(barycentric / currentSum)
 			};
 
-			Barycentric3 ClampConstrained(int axis)
+			Simplex3 ClampConstrained(int axis)
 			{
 				var axisNext = (int)Mathf.Repeat(axis + 1, 3);
 				var axisPrev = (int)Mathf.Repeat(axis + 2, 3);
@@ -165,7 +165,7 @@ namespace NiqonNO.Core
 					var halfDelta = (1 - barycentric[axis]) / 2.0f;
 					barycentric[axisNext] = halfDelta;
 					barycentric[axisPrev] = halfDelta;
-					return Barycentric3.FromVector3(barycentric);
+					return FromVector3(barycentric);
 				}
 
 				var sumDelta = 1 - currentSum;
@@ -174,13 +174,13 @@ namespace NiqonNO.Core
 
 				barycentric[axisNext] = Mathf.Clamp(barycentric[axisNext] + delta, 0, 1 - barycentric[axis]);
 				barycentric[axisPrev] = 1 - barycentric[axis] - barycentric[axisNext];
-				return Barycentric3.FromVector3(barycentric);
+				return FromVector3(barycentric);
 			}
 		}
 		
-		public static Barycentric3 NormalizeValue(Vector3 barycentric, float minValue, float maxValue) => Barycentric3.FromVector3((barycentric - Vector3.one * minValue) / (maxValue - minValue));
+		public static Simplex3 NormalizeValue(Vector3 barycentric, float minValue, float maxValue) => FromVector3((barycentric - Vector3.one * minValue) / (maxValue - minValue));
 
-		public static Vector3 DenormalizeValue(Barycentric3 barycentric, float minValue, float maxValue) => Vector3.one * minValue + (Vector3)barycentric * (maxValue - minValue);
+		public static Vector3 DenormalizeValue(Simplex3 barycentric, float minValue, float maxValue) => Vector3.one * minValue + (Vector3)barycentric * (maxValue - minValue);
 
 		public static Vector3 Round(Vector3 barycentric)
 		{
@@ -197,29 +197,39 @@ namespace NiqonNO.Core
 			if (delta == 0)
 				return floored;
 
-			var fracX = barycentric.x - floored.x;
-			var fracY = barycentric.y - floored.y;
-			var fracZ = barycentric.z - floored.z;
+			float fx = barycentric.x - floored.x;
+			float fy = barycentric.y - floored.y;
+			float fz = barycentric.z - floored.z;
+			
+			var frac = new (float f, int i)[] { (fx,0), (fy,1), (fz,2) };
+			Array.Sort(frac, (a,b) => b.f.CompareTo(a.f));
 
-			var minF = Mathf.Min(fracX, Mathf.Min(fracY, fracZ));
-			var maxF = Mathf.Max(fracX, Mathf.Max(fracY, fracZ));
-			var midF = fracX + fracY + fracZ - minF - maxF;
-
-			var threshold = delta == 1 ? maxF : midF;
-			if (fracX >= threshold)
+			for (int i = 0; i < delta && i < 4; i++)
 			{
-				floored.x += 1;
-				delta--;
+				switch (frac[i].i)
+				{
+					case 0: floored.x++; break;
+					case 1: floored.y++; break;
+					case 2: floored.z++; break;
+				}
 			}
 
-			if (fracY >= threshold && delta > 0)
-			{
-				floored.y += 1;
-				delta--;
-			}
-
-			if (fracZ >= threshold && delta > 0) floored.z += 1;
 			return floored;
+		}
+
+		public bool Equals(Simplex3 other)
+		{
+			return X.Equals(other.X) && Y.Equals(other.Y) && Z.Equals(other.Z);
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is Simplex3 other && Equals(other);
+		}
+
+		public override int GetHashCode()
+		{
+			return HashCode.Combine(X, Y, Z);
 		}
 	}
 }
