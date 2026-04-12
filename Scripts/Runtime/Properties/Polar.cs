@@ -37,7 +37,8 @@ namespace NiqonNO.Core
 				R * MathF.Sin(T)
 			);
 		}
-		
+
+		public static Polar FromCartesian(Vector2 coord) => FromCartesian(coord.x, coord.y);
 		public static Polar FromCartesian(float x, float y)
 		{
 			float r = MathF.Sqrt(x * x + y * y);
@@ -53,9 +54,24 @@ namespace NiqonNO.Core
 			return a;
 		}
 		
+		public Vector2 ToVector2()
+		{
+			return new Vector3(R, T);
+		}
+
+		public static Polar FromVector2(Vector2 v)
+		{
+			return new Polar(v.x, v.y);
+		}
+		
 		public override string ToString()
 		{
 			return $"({R}, {T})";
+		}
+		
+		public static implicit operator Vector2(Polar b)
+		{
+			return new Vector2(b.R, b.T);
 		}
 		
 		public bool Equals(Polar other)
