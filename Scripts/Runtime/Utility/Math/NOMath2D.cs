@@ -83,5 +83,13 @@ namespace NiqonNO.Core.Utility
 		{
 			return (position - coordinates).magnitude;
 		}
+		
+		public static Vector2 Remap(Vector2 value, float inMin, float inMax, float outMin, float outMax)
+		{
+			return new Vector2(
+				NOMath.Remap(value.x, inMin, inMax, outMin, outMax),
+				NOMath.Remap(value.y, inMin, inMax, outMin, outMax)
+			);
+		}
 	}
 }
