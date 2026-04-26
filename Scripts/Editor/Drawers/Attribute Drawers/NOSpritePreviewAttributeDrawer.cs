@@ -22,7 +22,7 @@ namespace NiqonNO.Core.Editor.Drawers.AttributeDrawers
             );
             
             GUILayout.BeginHorizontal(GUI.skin.box);
-            Rect rect = GUILayoutUtility.GetAspectRect(r.width / r.height);
+            Rect rect = GUILayoutUtility.GetAspectRect(r.width / r.height, GUILayout.MaxHeight(r.height), GUILayout.MaxWidth(r.width));
             GUI.DrawTextureWithTexCoords(rect, tex, uv, true);
             GUILayout.EndHorizontal();
         }
