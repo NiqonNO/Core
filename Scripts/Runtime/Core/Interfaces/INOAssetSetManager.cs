@@ -1,16 +1,22 @@
+using System.Collections.Generic;
+
 namespace NiqonNO.Core
 {
-	public interface INOAssetSetManager<TData, TDataState, TRuntimeState>
+	public interface INOAssetSetManager<TData, TDataState>
 		where TData : NOData
-		where TDataState : NODataState<TData> 
-		where TRuntimeState : INOAssetSetState<TData, TDataState>
+		where TDataState : NODataState<TData>
 	{
 		protected INOContext Context { get; }
-		protected TRuntimeState RuntimeState { get; }
+		public Dictionary<TData, TDataState> States { get; }
 
-		public TDataState GetState(TData data)
+		public bool TryGetState(TData data, out TDataState state)
 		{
-			if (RuntimeState.States.TryGetValue(data, out var state)) return state;
+			return States.TryGetValue(data, out state);
+		}
+		
+		public TDataState GetOrCreateState(TData data)
+		{
+			if (States.TryGetValue(data, out var state)) return state;
 			return CreateDataState(data);
 		}
 
@@ -18,7 +24,7 @@ namespace NiqonNO.Core
 		{
 			TDataState clipState = Context.Factory.CreateAsset<TDataState>();
 			clipState.Initialize(data);
-			RuntimeState.States.Add(data, clipState);
+			States.Add(data, clipState);
 			return clipState;
 		}
 	}
