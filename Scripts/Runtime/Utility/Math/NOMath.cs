@@ -1,6 +1,6 @@
 namespace NiqonNO.Core.Utility
 {
-	public class NOMath
+	public static class NOMath
 	{
 		public static float Remap(float value, float inMin, float inMax, float outMin, float outMax)
 		{

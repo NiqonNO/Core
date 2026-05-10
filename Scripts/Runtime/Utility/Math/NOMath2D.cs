@@ -91,5 +91,19 @@ namespace NiqonNO.Core.Utility
 				NOMath.Remap(value.y, inMin, inMax, outMin, outMax)
 			);
 		}
+		
+		public static float InverseLerp(Vector2 a, Vector2 b, Vector2 value)
+		{
+			Vector2 AB = b - a;
+			Vector2 AV = value - a;
+			return Mathf.Clamp01(Vector2.Dot(AV, AB) / Vector2.Dot(AB, AB));
+		}
+		
+		public static float InverseLerpUnclamped(Vector2 a, Vector2 b, Vector2 value)
+		{
+			Vector2 AB = b - a;
+			Vector2 AV = value - a;
+			return Vector2.Dot(AV, AB) / Vector2.Dot(AB, AB);
+		}
 	}
 }
