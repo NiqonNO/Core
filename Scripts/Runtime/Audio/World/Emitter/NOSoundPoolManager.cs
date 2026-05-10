@@ -13,14 +13,18 @@ namespace NiqonNO.Core.Audio.World
 
         [SerializeField, SceneObjectsOnly]
         private NOSoundEmitter EmitterTemplate;
+        
+        public bool Initialized { get; private set; }
 
         public override void Initialize()
         {
             InitializePool();
+            Initialized = true;
         }
 
         public override void Dispose()
         {
+            Initialized = false;
             List<NOSoundEmitter> emitters = new List<NOSoundEmitter>(ActiveEmitters.Values);
             foreach(var emitter in emitters)
             {
