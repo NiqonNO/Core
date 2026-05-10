@@ -19,7 +19,7 @@ namespace NiqonNO.Core
 
         public NOContainer Container { get; private set; }
         public NOFactory Factory { get; private set;  }
-        
+
         public void InitializeContext()
         {
             Container = new NOContainer(gameObject.scene.name);
@@ -29,6 +29,12 @@ namespace NiqonNO.Core
                 (this as INOContext<NOManagerSO>).RegisterServices();
             if (!MonoBehaviourManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerMonoBehaviour>).RegisterServices();
+
+            if (!ScriptableObjectManagers.IsNullOrEmpty())
+                (this as INOContext<NOManagerSO>).InitializeServices();
+            if (!MonoBehaviourManagers.IsNullOrEmpty())
+                (this as INOContext<NOManagerMonoBehaviour>).InitializeServices();
+
             Container.ActivateScope(this);
         }
 

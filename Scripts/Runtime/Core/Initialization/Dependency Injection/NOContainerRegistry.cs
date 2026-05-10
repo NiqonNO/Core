@@ -64,5 +64,5 @@ namespace NiqonNO.Core
             container.Inject(initializable);
             initializable.Initialize();
         }
-	}
+    }
 }

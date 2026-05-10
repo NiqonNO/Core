@@ -17,9 +17,13 @@ namespace NiqonNO.Core
         {
             Container = new NOContainer();
             Factory = new NOFactory(Container);
-            
+
             if (!ScriptableObjectManagers.IsNullOrEmpty())
+            {
                 (this as INOContext<NOManagerSO>).RegisterServices();
+                (this as INOContext<NOManagerSO>).InitializeServices();
+            }
+
             Container.ActivateScope(this);
         }
 

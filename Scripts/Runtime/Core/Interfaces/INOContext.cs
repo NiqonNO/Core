@@ -24,6 +24,15 @@ namespace NiqonNO.Core
 				manager.Dispose();
 			}
 		}
+
+		void InitializeServices()
+		{
+			foreach (var manager in Managers)
+			{
+				Container.Inject(manager);
+				manager.Initialize();
+			}
+		}
         
 		private bool CheckNull(INOManager manager)
 		{
