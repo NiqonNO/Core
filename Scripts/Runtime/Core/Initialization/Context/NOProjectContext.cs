@@ -19,10 +19,7 @@ namespace NiqonNO.Core
             Factory = new NOFactory(Container);
 
             if (!ScriptableObjectManagers.IsNullOrEmpty())
-            {
                 (this as INOContext<NOManagerSO>).RegisterServices();
-                (this as INOContext<NOManagerSO>).InitializeServices();
-            }
 
             Container.ActivateScope(this);
         }
@@ -31,6 +28,7 @@ namespace NiqonNO.Core
         {
             if (!ScriptableObjectManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerSO>).UnregisterServices();
+            
             Container.DeactivateScope();
 
             Container = null;

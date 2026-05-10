@@ -30,11 +30,6 @@ namespace NiqonNO.Core
             if (!MonoBehaviourManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerMonoBehaviour>).RegisterServices();
 
-            if (!ScriptableObjectManagers.IsNullOrEmpty())
-                (this as INOContext<NOManagerSO>).InitializeServices();
-            if (!MonoBehaviourManagers.IsNullOrEmpty())
-                (this as INOContext<NOManagerMonoBehaviour>).InitializeServices();
-
             Container.ActivateScope(this);
         }
 
@@ -44,6 +39,7 @@ namespace NiqonNO.Core
                 (this as INOContext<NOManagerSO>).UnregisterServices();
             if (!MonoBehaviourManagers.IsNullOrEmpty())
                 (this as INOContext<NOManagerMonoBehaviour>).UnregisterServices();
+            
             Container.DeactivateScope();
             
             Container = null;

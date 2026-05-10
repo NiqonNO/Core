@@ -6,6 +6,7 @@ namespace NiqonNO.Core
 	public class NOContainerRegistry
 	{
 		private readonly Dictionary<string, NOContainer> ContainersByScope = new();
+        private readonly Dictionary<string, List<INOManager>> ManagersWaitingForInitialization = new();
         private readonly Dictionary<string, List<INOInitializable>> WaitingForInitialization = new();
 
         public void ResetState()
@@ -25,13 +26,19 @@ namespace NiqonNO.Core
                 throw new ArgumentNullException(nameof(container));
 
             ContainersByScope[container.MyScope] = container;
-            if (!WaitingForInitialization.TryGetValue(container.MyScope, out var initializables)) return;
 
-            foreach (var initializable in initializables)
+            if (ManagersWaitingForInitialization.TryGetValue(container.MyScope, out var managers))
             {
-                InitializeInitializable(container, initializable);
+                foreach (var manager in managers)
+                    InitializeInitializable(container, manager);
+                ManagersWaitingForInitialization.Remove(container.MyScope);
             }
-            WaitingForInitialization.Remove(container.MyScope);
+            if (WaitingForInitialization.TryGetValue(container.MyScope, out var initializables))
+            {
+                foreach (var initializable in initializables)
+                    InitializeInitializable(container, initializable);
+                WaitingForInitialization.Remove(container.MyScope);
+            }
         }
 
         public void UnregisterContainer(NOContainer container)
@@ -40,6 +47,25 @@ namespace NiqonNO.Core
             ContainersByScope.Remove(container.MyScope);
         }
 
+        public void EnqueueManagerForInitialization(string scope, INOManager manager)
+        {
+            if (manager == null) return;
+            scope ??= string.Empty;
+
+            if (ContainersByScope.TryGetValue(scope, out var context))
+            {
+                InitializeInitializable(context, manager);
+                return;
+            }
+
+            if (!ManagersWaitingForInitialization.TryGetValue(scope, out var list))
+            {
+                list = new List<INOManager>();
+                ManagersWaitingForInitialization[scope] = list;
+            }
+            list.Add(manager);
+        }
+        
         public void EnqueueForInitialization(string scope, INOInitializable initializable)
         {
             if (initializable == null) return;

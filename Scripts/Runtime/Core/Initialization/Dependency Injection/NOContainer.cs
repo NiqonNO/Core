@@ -44,6 +44,7 @@ namespace NiqonNO.Core
                     !typeof(INOService).IsAssignableFrom(iface)) continue;
                 Registrations[iface] = manager;
             }
+            Registry.EnqueueManagerForInitialization(MyScope, manager);
         }
 
         public void UnregisterService(INOManager manager)
