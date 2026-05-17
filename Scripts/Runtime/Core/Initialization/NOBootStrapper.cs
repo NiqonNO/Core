@@ -18,7 +18,6 @@ namespace NiqonNO.Core
 			Application.quitting += Dispose;
 			Instance = new NOBootStrapper();
 			NOContainer.ResetStaticState();
-			Instance.LoadProjectContext();
 		}
 		private static void Dispose()
 		{
@@ -27,7 +26,8 @@ namespace NiqonNO.Core
 			Instance = null;
 		}
 
-		private void LoadProjectContext()
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+		private static void LoadProjectContext()
 		{
 			var projectContexts = Resources.LoadAll<NOProjectContext>(ResourcesCorePath);
 			if (projectContexts.IsNullOrEmpty())
@@ -40,7 +40,12 @@ namespace NiqonNO.Core
 				Debug.LogWarning($"More than one objects of type {nameof(NOProjectContext)} have been found in Resources \"{ResourcesCorePath}\" folder. First result will be used.");
 			}
 
-			ProjectContext = projectContexts[0];
+			Instance.SetProjectContext(projectContexts[0]);
+		}
+
+		private void SetProjectContext(NOProjectContext context)
+		{
+			ProjectContext = context;
 			ProjectContext.InitializeContext();
 		}
 		
