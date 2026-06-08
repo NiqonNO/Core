@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace NiqonNO.Core.Editor.Windows
 {
-    public class NOcriptableObjectCreator : OdinMenuEditorWindow
+    public class NOScriptableObjectCreator : OdinMenuEditorWindow
     {
         static HashSet<Type> scriptableObjectTypes = AssemblyUtilities.GetTypes(AssemblyCategory.Scripts)
             .Where(t =>
@@ -37,7 +37,7 @@ namespace NiqonNO.Core.Editor.Windows
                 }
             }
 
-            var window = CreateInstance<NOcriptableObjectCreator>();
+            var window = CreateInstance<NOScriptableObjectCreator>();
             window.ShowUtility();
             window.position = GUIHelper.GetEditorWindowRect().AlignCenter(800, 500);
             window.titleContent = new GUIContent(path);
