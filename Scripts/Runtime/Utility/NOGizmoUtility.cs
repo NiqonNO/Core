@@ -18,7 +18,7 @@ namespace NiqonNO.Core.Utility
             Camera cam = Camera.current;
             if (cam != null)
             {
-                DrawSides(cam.transform.forward);
+                DrawSides((cam.transform.position - center).normalized);
                 return;
             }
 
