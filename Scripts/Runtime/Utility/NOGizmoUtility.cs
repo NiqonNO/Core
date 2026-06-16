@@ -73,5 +73,17 @@ namespace NiqonNO.Core.Utility
                 prevPoint = nextPoint;
             }
         }
+        
+        public static void DrawSphere(Vector3 center, float radius, int segments = 32)
+        {
+            Camera cam = Camera.current;
+            if (cam != null)
+            {
+                DrawCircle(center, (cam.transform.position - center).normalized, radius, segments);
+                return;
+            }
+            
+            Gizmos.DrawWireSphere(center, radius);
+        }
     }
 }
