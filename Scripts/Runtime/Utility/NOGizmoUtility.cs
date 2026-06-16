@@ -18,7 +18,7 @@ namespace NiqonNO.Core.Utility
             Camera cam = Camera.current;
             if (cam != null)
             {
-                DrawSides((cam.transform.position - center).normalized);
+                DrawSides(cam.orthographic ? cam.transform.forward : (cam.transform.position - center).normalized);
                 return;
             }
 
@@ -79,7 +79,7 @@ namespace NiqonNO.Core.Utility
             Camera cam = Camera.current;
             if (cam != null)
             {
-                DrawCircle(center, (cam.transform.position - center).normalized, radius, segments);
+                DrawCircle(center, cam.orthographic ? cam.transform.forward : (cam.transform.position - center).normalized, radius, segments);
                 return;
             }
             
