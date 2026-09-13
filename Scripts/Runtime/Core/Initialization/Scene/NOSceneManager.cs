@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace NiqonNO.Core.Scene
 {
-    public class NOSceneManager : NOManagerWithStateSO<NOSceneManagerState>
+    public class NOSceneManager : NOManagerWithStateSO<NOSceneManagerState>, INOSceneService
     {
         [SerializeField, ValueDropdown(nameof(GetScenes))]
         public string MainScene;
@@ -81,6 +81,12 @@ namespace NiqonNO.Core.Scene
             }
             CreateSceneLoadCommand("", scene);
         }
+
+        public void AddOnLoadingStartedEvent(UnityAction action) => OnLoadingStartedEvent.AddListener(action);
+        public void RemoveOnLoadingStartedEvent(UnityAction action) => OnLoadingStartedEvent.RemoveListener(action);
+        
+        public void AddOnLoadingEndedEvent(UnityAction action) => OnLoadingFinishedEvent.AddListener(action);
+        public void RemoveOnLoadingEndedEvent(UnityAction action) => OnLoadingFinishedEvent.RemoveListener(action);
 
         private void CreateSceneLoadCommand(string sceneToLoad, string sceneToUnload)
         {
